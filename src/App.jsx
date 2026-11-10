@@ -19,13 +19,13 @@ import {
   Trash2
 } from 'lucide-react';
 
-// 預設資料庫（已完整修正：福音朋友對應男介/女介，聖徒對應弟兄/姊妹）
+// 預設資料庫
 const INITIAL_ROSTER = [
   // 信光區 聖徒 弟兄
   ...["左其浩","林建安","蔡雨桐","陳子謙","陳秋雄","黃才育","陳明宏","李冠融","廖文毅","姜心誠","黃睿聰","呂穗枝","呂亦揚"].map(name => ({
     id: `xg-b-${name}`, district: "信光區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 信光區 福音朋友 男介
+  // 信光區 福音朋友
   ...["房宣佑","李亦晟","胡書倉","胡瑞源","林建宏","莊文凱","黃志強","徐寶泰","黃朝御"].map(name => ({
     id: `xg-bf-${name}`, district: "信光區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
@@ -33,7 +33,7 @@ const INITIAL_ROSTER = [
   ...["房陳怡冰","房慈娜","莊陳怡汝","蔡鄭庭婷","陳劉芳群","陳劉雅倫","耿謝修心","耿明","徐佩婷","陳麗俐","歐陽太詠","歐陽太鈞","方淑蘭","黃徐懿瑤","葉淑芳","楊文淑","李晴和","姚桂蘭","方淑娟","楊麗妮","左李植芳","徐詠慈"].map(name => ({
     id: `xg-s-${name}`, district: "信光區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 信光區 福音朋友 女介
+  // 信光區 福音朋友
   ...["黃素杏","陳蘭秀","黃圓懿","陳玉嬌","黃淑芬","鄭怡伶","林宛蓉","陳華美"].map(name => ({
     id: `xg-sf-${name}`, district: "信光區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
@@ -42,7 +42,7 @@ const INITIAL_ROSTER = [
   ...["胡哲維","賴建旭","甘霖","李書維","梁基棠","梁力尹","葛三民","胡師賓","邱育","王智文","連富儀","蔡明翰","張常生","謝金元"].map(name => ({
     id: `yw-b-${name}`, district: "藝文區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 藝文區 福音朋友 男介
+  // 藝文區 福音朋友
   ...["裴佳羿","胡辰瑞","康逸銘","蘇易昇","呂健璋"].map(name => ({
     id: `yw-bf-${name}`, district: "藝文區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
@@ -50,7 +50,7 @@ const INITIAL_ROSTER = [
   ...["胡薇雅","甘徐恩典","賴邱馨儀","李張貞齡","梁林玉琴","胡張巧雲","黃思文","陳美鳳","江東旭","高優香","連陳淑文","葛姜錦玲","張高金蘭","謝呂淑宜","張曉吉","廖蘇美如","詹昀妮","周猷葳"].map(name => ({
     id: `yw-s-${name}`, district: "藝文區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 藝文區 福音朋友 女介
+  // 藝文區 福音朋友
   ...["古慈緣","廖貞惠","黃瑋婷","徐黃罔","康寶玲","康寶珊","蘇韋溱","鄭森妹","蔡雨蓉","呂瑩嘉"].map(name => ({
     id: `yw-sf-${name}`, district: "藝文區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
@@ -59,7 +59,7 @@ const INITIAL_ROSTER = [
   ...["何積忠","曾志強","陳伯易","曾信恩","王祥名","何柏諺","李瑛奇","姚愈郁","方鴻鳴","林維祥","柯貝德","李元勳","羅和平","李浚凌","楊立綱"].map(name => ({
     id: `bq-b-${name}`, district: "寶慶區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 寶慶區 福音朋友 男介
+  // 寶慶區 福音朋友
   ...["陳柏翰","陳展毅"].map(name => ({
     id: `bq-bf-${name}`, district: "寶慶區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
@@ -67,7 +67,7 @@ const INITIAL_ROSTER = [
   ...["何何蕙明","曾曾玉仙","張吳杼庭","楊文玲","李欣儒","畢呂岱蓉","張佑甄","張素連","林張錦珠","方李蕙君","羅黃愛真","莊王淑英","齊張復莉","鍾玉珍","王淑君","吳淑金","李陳香玲","姚宏愛","姚信真","呂良昭","郭美雪","易向東","蔡素惠","柯陳羿云","董子靈","陳秋美","林維雍","李李辰薇","羅亦喻"].map(name => ({
     id: `bq-s-${name}`, district: "寶慶區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 寶慶區 福音朋友 女介
+  // 寶慶區 福音朋友
   ...["姚晴徽","陳仕蓁"].map(name => ({
     id: `bq-sf-${name}`, district: "寶慶區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
@@ -77,7 +77,7 @@ const INITIAL_ROSTER = [
   ...["陳逸峰","鄭勝忠","齊文駿","陳鴻琩","劉文邦","劉得寬","鄭志成"].map(name => ({
     id: `zq-b-${name}`, district: "自強區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 自強區 福音朋友 男介
+  // 自強區 福音朋友
   ...["陳庭成","蔡忠穆","吳昀霖","陳楚恩","王建中","許庭豪"].map(name => ({
     id: `zq-bf-${name}`, district: "自強區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
@@ -85,7 +85,7 @@ const INITIAL_ROSTER = [
   ...["陳蔡怡君","鄭王苔菱","齊沈采蓉","陳潘婉柔","鄭安秀","徐李甜琇","王蔡宜倩","黃姿榳","潘育華","王佳怡","李函穎","康秀娜","楊主恩","林香圻","聶少秋","熊娟賢","廖敏玲","張鷹梅","葉虹妘"].map(name => ({
     id: `zq-s-${name}`, district: "自強區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 自強區 福音朋友 女介
+  // 自強區 福音朋友
   ...["曾靖元","朱芸","玥宇","邱思旋","吾羽","王嘉瑜","張家瑋","陳家慧","吳亭葶","羅心廷"].map(name => ({
     id: `zq-sf-${name}`, district: "自強區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
@@ -237,7 +237,20 @@ export default function App() {
 
   const [roster, setRoster] = useState(() => {
     const saved = localStorage.getItem('prayer_wall_roster');
-    return saved ? JSON.parse(saved) : INITIAL_ROSTER;
+    if (!saved) return INITIAL_ROSTER;
+    try {
+      const parsed = JSON.parse(saved);
+      // 【保險機制】：強制修正 localStorage 中所有被誤植為聖徒稱謂的福音朋友/未得救家人
+      return parsed.map(item => {
+        if (item.identity === '福音朋友' || item.identity === '聖徒未得救的家人') {
+          if (item.gender === '弟兄') return { ...item, gender: '男介' };
+          if (item.gender === '姊妹') return { ...item, gender: '女介' };
+        }
+        return item;
+      });
+    } catch (e) {
+      return INITIAL_ROSTER;
+    }
   });
 
   const [prayerItems, setPrayerItems] = useState(() => {
@@ -656,43 +669,52 @@ export default function App() {
             {/* CARD VIEW WITH LONG-PRESS */}
             {viewMode === 'card' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {filteredRoster.map(item => (
-                  <div 
-                    key={item.id}
-                    onTouchStart={() => handleTouchStart(item, 'roster')}
-                    onTouchEnd={handleTouchEnd}
-                    onMouseDown={() => handleTouchStart(item, 'roster')}
-                    onMouseUp={handleTouchEnd}
-                    onMouseLeave={handleTouchEnd}
-                    className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3 shadow-xs hover:border-[#D5C9B8] transition-all flex flex-col justify-between relative group select-none cursor-pointer active:scale-98"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${getIdentityBadgeClass(item.identity)}`}>
-                          {item.identity}
-                        </span>
-                        {item.district && <span className="text-[10px] text-[#A0958B]">{item.district}</span>}
-                      </div>
-                      <div className="font-medium text-sm text-[#2C2725] font-serif mb-1">
-                        {item.name}
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-[#8C827A]">
-                        <span>{item.gender}</span>
-                        {item.ageGroup && (
-                          <>
-                            <span>•</span>
-                            <span>{item.ageGroup}</span>
-                          </>
+                {filteredRoster.map(item => {
+                  // 【保險機制】：若身份是福音朋友/未得救家人，但稱謂被誤植為弟兄/姊妹，直接強制顯示為男介/女介
+                  let displayGender = item.gender;
+                  if ((item.identity === '福音朋友' || item.identity === '聖徒未得救的家人')) {
+                    if (displayGender === '弟兄') displayGender = '男介';
+                    if (displayGender === '姊妹') displayGender = '女介';
+                  }
+
+                  return (
+                    <div 
+                      key={item.id}
+                      onTouchStart={() => handleTouchStart(item, 'roster')}
+                      onTouchEnd={handleTouchEnd}
+                      onMouseDown={() => handleTouchStart(item, 'roster')}
+                      onMouseUp={handleTouchEnd}
+                      onMouseLeave={handleTouchEnd}
+                      className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3 shadow-xs hover:border-[#D5C9B8] transition-all flex flex-col justify-between relative group select-none cursor-pointer active:scale-98"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${getIdentityBadgeClass(item.identity)}`}>
+                            {item.identity}
+                          </span>
+                          {item.district && <span className="text-[10px] text-[#A0958B]">{item.district}</span>}
+                        </div>
+                        <div className="font-medium text-sm text-[#2C2725] font-serif mb-1">
+                          {item.name}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-[#8C827A]">
+                          <span>{displayGender}</span>
+                          {item.ageGroup && (
+                            <>
+                              <span>•</span>
+                              <span>{item.ageGroup}</span>
+                            </>
+                          )}
+                        </div>
+                        {item.notes && (
+                          <div className="mt-1 text-[10px] text-[#8C6D58] bg-[#F4EFEA] p-1 rounded font-sans">
+                            {item.notes}
+                          </div>
                         )}
                       </div>
-                      {item.notes && (
-                        <div className="mt-1 text-[10px] text-[#8C6D58] bg-[#F4EFEA] p-1 rounded font-sans">
-                          {item.notes}
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
