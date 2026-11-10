@@ -246,12 +246,14 @@ export default function App() {
   });
 
   const [coEditorName, setCoEditorName] = useState(() => {
-    return localStorage.getItem('prayer_wall_co_editor_name') || '';
+    return localStorage.getItem('prayer_wall_co_editor_name'] || '';
   });
 
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [isSelfOnline, setIsSelfOnline] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState([
+    { id: 'u-1', name: "交通配搭中", status: "線上活動中", avatarBg: "bg-[#8C6D58]", isSelf: false, lastActive: "線上" }
+  ]);
+  const [isSelfOnline, setIsSelfOnline] = useState(true);
   const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -278,6 +280,25 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('prayer_wall_co_editor_name', coEditorName);
   }, [coEditorName]);
+
+  // 線上狀態管理
+  useEffect(() => {
+    if (coEditorName.trim() && isSelfOnline) {
+      setOnlineUsers(prev => {
+        const exists = prev.some(u => u.isSelf);
+        if (exists) {
+          return prev.map(u => u.isSelf ? { ...u, name: coEditorName.trim() } : u);
+        } else {
+          return [
+            ...prev,
+            { id: 'u-self', name: coEditorName.trim(), status: "線上活動中", avatarBg: "bg-[#768A75]", isSelf: true, lastActive: "剛剛" }
+          ];
+        }
+      });
+    } else {
+      setOnlineUsers(prev => prev.filter(u => !u.isSelf));
+    }
+  }, [coEditorName, isSelfOnline]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('全部');
@@ -317,25 +338,20 @@ export default function App() {
     setLogs(prev => [newLog, ...prev]);
   };
 
-  // 長按處理函式
+  // 長按事件
   const handleTouchStart = (item, type) => {
     timerRef.current = setTimeout(() => {
-      if (type === 'roster') {
-        setActiveRosterActionItem(item);
-      } else if (type === 'prayer') {
-        setActivePrayerActionItem(item);
-      }
-      if (navigator.vibrate) navigator.vibrate(50); // 觸覺回饋
-    }, 500); // 長按 500ms 觸發
+      if (type === 'roster') setActiveRosterActionItem(item);
+      else if (type === 'prayer') setActivePrayerActionItem(item);
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 500);
   };
 
   const handleTouchEnd = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+    if (timerRef.current) clearTimeout(timerRef.current);
   };
 
-  // 名單過濾邏輯
+  // 名單過濾
   const filteredRoster = useMemo(() => {
     return roster.filter(item => {
       if (selectedDistrict !== '全部' && item.district !== selectedDistrict) return false;
@@ -354,16 +370,12 @@ export default function App() {
     });
   }, [roster, selectedDistrict, selectedIdentity, selectedAge, searchQuery]);
 
-  // 名單處理：新增
+  // 新增名單
   const handleAddMemberSubmit = (e) => {
     e.preventDefault();
     if (!newMember.name.trim()) return;
 
-    const created = {
-      ...newMember,
-      id: `custom-${Date.now()}`
-    };
-
+    const created = { ...newMember, id: `custom-${Date.now()}` };
     setRoster(prev => [created, ...prev]);
     addLog(`新增代禱名單: ${created.name} (${created.district || '未分類'})`);
     setIsAddMemberOpen(false);
@@ -371,7 +383,7 @@ export default function App() {
     showToast(`已成功新增名單：${created.name}`);
   };
 
-  // 名單處理：編輯儲存
+  // 編輯名單
   const handleEditMemberSubmit = (e) => {
     e.preventDefault();
     if (!editingRosterMember || !editingRosterMember.name.trim()) return;
@@ -382,7 +394,7 @@ export default function App() {
     showToast(`已更正 ${editingRosterMember.name} 的資料`);
   };
 
-  // 名單處理：刪除
+  // 刪除名單
   const handleDeleteMember = (member) => {
     setRoster(prev => prev.filter(m => m.id !== member.id));
     addLog(`刪除代禱名單: ${member.name}`);
@@ -390,7 +402,6 @@ export default function App() {
     showToast(`已刪除名單：${member.name}`);
   };
 
-  // 複製文字
   const handleCopyText = (text, title) => {
     navigator.clipboard.writeText(text);
     showToast(`已複製「${title}」內容`);
@@ -450,7 +461,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  // 儲存代禱事項
   const handleSavePrayerItem = (e) => {
     e.preventDefault();
     if (!currentPrayerItem.title.trim() || !currentPrayerItem.content.trim()) return;
@@ -510,10 +520,22 @@ export default function App() {
             </button>
           </div>
 
+          {/* ONLINE USERS & EDITOR PROFILE */}
           <div className="flex items-center space-x-1.5 shrink-0">
+            <button
+              onClick={() => setIsOnlineModalOpen(true)}
+              className="flex items-center space-x-1 bg-[#E8F0E8] hover:bg-[#DCE8DC] px-2 py-1.5 rounded-full border border-[#CDE0CD] transition-colors"
+              title="查看線上配搭"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#4E6B4E] animate-pulse"></span>
+              <Users className="w-3.5 h-3.5 text-[#4E6B4E]" />
+              <span className="text-xs font-medium text-[#3A523A]">{onlineUsers.length}位</span>
+            </button>
+
             <button 
               onClick={() => setIsEditorModalOpen(true)}
               className="flex items-center space-x-1 text-xs bg-[#F4EFEA] hover:bg-[#EBE4D8] px-2 py-1.5 rounded-full border border-[#E6DDD0] transition-colors"
+              title="設定配搭名稱"
             >
               <User className="w-3.5 h-3.5 text-[#8C6D58]" />
               <span className="text-[#5A524D] font-medium hidden sm:inline">{coEditorName || "未設定"}</span>
@@ -971,6 +993,67 @@ export default function App() {
         </div>
       )}
 
+      {/* ONLINE USERS MODAL */}
+      {isOnlineModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
+            <div className="flex items-center justify-between mb-3 border-b border-[#EBE4D8] pb-2">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#4E6B4E] animate-pulse"></span>
+                <h3 className="font-serif font-medium text-base text-[#2C2725]">目前線上配搭</h3>
+              </div>
+              <button onClick={() => setIsOnlineModalOpen(false)} className="text-[#A0958B] hover:text-[#3D3735]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#8C827A] mb-3">
+              當前有 <span className="font-semibold text-[#4E6B4E]">{onlineUsers.length} 位</span> 配搭同時在線上：
+            </p>
+
+            <div className="space-y-2.5 mb-4">
+              {onlineUsers.map(u => (
+                <div key={u.id} className="flex items-center justify-between bg-[#F4EFEA] p-2.5 rounded-xl border border-[#E6DDD0]">
+                  <div className="flex items-center space-x-2.5">
+                    <div className={`w-7 h-7 rounded-full ${u.avatarBg} text-white flex items-center justify-center text-xs font-serif shadow-xs`}>
+                      {u.name.slice(0, 1)}
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-xs font-medium text-[#2C2725]">{u.name}</span>
+                        {u.isSelf && <span className="text-[10px] bg-[#8C6D58] text-white px-1.5 py-0.2 rounded font-sans">(你)</span>}
+                      </div>
+                      <span className="text-[10px] text-[#8C827A] block">{u.status}</span>
+                    </div>
+                  </div>
+                  {u.isSelf ? (
+                    <button 
+                      onClick={() => {
+                        setIsSelfOnline(false);
+                        addLog(`${u.name} 已下線`);
+                        showToast("已下線");
+                      }}
+                      className="text-[10px] text-[#A84A4A] hover:underline"
+                    >
+                      下線
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-[#A0958B]">{u.lastActive}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setIsOnlineModalOpen(false)}
+              className="w-full bg-[#8C6D58] text-white text-xs py-2 rounded-xl hover:bg-[#785C49] transition-colors"
+            >
+              關閉
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* EDIT ROSTER MODAL */}
       {editingRosterMember && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
@@ -1117,7 +1200,7 @@ export default function App() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-[#8C827A] mb-4">請輸入您的稱呼，以便配搭們識別紀錄。</p>
+            <p className="text-xs text-[#8C827A] mb-4">請輸入您的稱呼，以便線上配搭識別。</p>
             <input 
               type="text"
               value={coEditorName}
@@ -1127,7 +1210,10 @@ export default function App() {
             />
             <button 
               onClick={() => {
-                if (coEditorName.trim()) showToast("已儲存配搭名稱");
+                if (coEditorName.trim()) {
+                  setIsSelfOnline(true);
+                  showToast("已儲存配搭名稱並連線");
+                }
                 setIsEditorModalOpen(false);
               }}
               className="w-full bg-[#8C6D58] hover:bg-[#785C49] text-white text-xs py-2 rounded-xl font-medium"
