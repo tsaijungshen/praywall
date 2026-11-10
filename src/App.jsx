@@ -246,7 +246,7 @@ export default function App() {
   });
 
   const [coEditorName, setCoEditorName] = useState(() => {
-    return localStorage.getItem('prayer_wall_co_editor_name'] || '';
+    return localStorage.getItem('prayer_wall_co_editor_name') || '';
   });
 
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
