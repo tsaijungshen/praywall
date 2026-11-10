@@ -16,9 +16,7 @@ import {
   List, 
   X, 
   Sparkles,
-  Share2,
-  Trash2,
-  MoreVertical
+  Trash2
 } from 'lucide-react';
 
 // 預設資料庫
@@ -27,68 +25,69 @@ const INITIAL_ROSTER = [
   ...["左其浩","林建安","蔡雨桐","陳子謙","陳秋雄","黃才育","陳明宏","李冠融","廖文毅","姜心誠","黃睿聰","呂穗枝","呂亦揚"].map(name => ({
     id: `xg-b-${name}`, district: "信光區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 信光區 弟兄 福音朋友
+  // 信光區 福音朋友 (男介)
   ...["房宣佑","李亦晟","胡書倉","胡瑞源","林建宏","莊文凱","黃志強","徐寶泰","黃朝御"].map(name => ({
-    id: `xg-bf-${name}`, district: "信光區", ageGroup: "", gender: "弟兄", identity: "福音朋友", name, notes: ""
+    id: `xg-bf-${name}`, district: "信光區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
   // 信光區 姊妹 聖徒
   ...["房陳怡冰","房慈娜","莊陳怡汝","蔡鄭庭婷","陳劉芳群","陳劉雅倫","耿謝修心","耿明","徐佩婷","陳麗俐","歐陽太詠","歐陽太鈞","方淑蘭","黃徐懿瑤","葉淑芳","楊文淑","李晴和","姚桂蘭","方淑娟","楊麗妮","左李植芳","徐詠慈"].map(name => ({
     id: `xg-s-${name}`, district: "信光區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 信光區 姊妹 福音朋友
+  // 信光區 福音朋友 (女介)
   ...["黃素杏","陳蘭秀","黃圓懿","陳玉嬌","黃淑芬","鄭怡伶","林宛蓉","陳華美"].map(name => ({
-    id: `xg-sf-${name}`, district: "信光區", ageGroup: "", gender: "姊妹", identity: "福音朋友", name, notes: ""
+    id: `xg-sf-${name}`, district: "信光區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
 
   // 藝文區 弟兄 聖徒
   ...["胡哲維","賴建旭","甘霖","李書維","梁基棠","梁力尹","葛三民","胡師賓","邱育","王智文","連富儀","蔡明翰","張常生","謝金元"].map(name => ({
     id: `yw-b-${name}`, district: "藝文區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 藝文區 弟兄 福音朋友
+  // 藝文區 福音朋友 (男介)
   ...["裴佳羿","胡辰瑞","康逸銘","蘇易昇","呂健璋"].map(name => ({
-    id: `yw-bf-${name}`, district: "藝文區", ageGroup: "", gender: "弟兄", identity: "福音朋友", name, notes: ""
+    id: `yw-bf-${name}`, district: "藝文區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
   // 藝文區 姊妹 聖徒
   ...["胡薇雅","甘徐恩典","賴邱馨儀","李張貞齡","梁林玉琴","胡張巧雲","黃思文","陳美鳳","江東旭","高優香","連陳淑文","葛姜錦玲","張高金蘭","謝呂淑宜","張曉吉","廖蘇美如","詹昀妮","周猷葳"].map(name => ({
     id: `yw-s-${name}`, district: "藝文區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 藝文區 姊妹 福音朋友
+  // 藝文區 福音朋友 (女介)
   ...["古慈緣","廖貞惠","黃瑋婷","徐黃罔","康寶玲","康寶珊","蘇韋溱","鄭森妹","蔡雨蓉","呂瑩嘉"].map(name => ({
-    id: `yw-sf-${name}`, district: "藝文區", ageGroup: "", gender: "姊妹", identity: "福音朋友", name, notes: ""
+    id: `yw-sf-${name}`, district: "藝文區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
 
   // 寶慶區 弟兄 聖徒
   ...["何積忠","曾志強","陳伯易","曾信恩","王祥名","何柏諺","李瑛奇","姚愈郁","方鴻鳴","林維祥","柯貝德","李元勳","羅和平","李浚凌","楊立綱"].map(name => ({
     id: `bq-b-${name}`, district: "寶慶區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 寶慶區 弟兄 福音朋友
+  // 寶慶區 福音朋友 (男介)
   ...["陳柏翰","陳展毅"].map(name => ({
-    id: `bq-bf-${name}`, district: "寶慶區", ageGroup: "", gender: "弟兄", identity: "福音朋友", name, notes: ""
+    id: `bq-bf-${name}`, district: "寶慶區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
   // 寶慶區 姊妹 聖徒
   ...["何何蕙明","曾曾玉仙","張吳杼庭","楊文玲","李欣儒","畢呂岱蓉","張佑甄","張素連","林張錦珠","方李蕙君","羅黃愛真","莊王淑英","齊張復莉","鍾玉珍","王淑君","吳淑金","李陳香玲","姚宏愛","姚信真","呂良昭","郭美雪","易向東","蔡素惠","柯陳羿云","董子靈","陳秋美","林維雍","李李辰薇","羅亦喻"].map(name => ({
     id: `bq-s-${name}`, district: "寶慶區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 寶慶區 姊妹 福音朋友
-  ...["姚晴徽","陳仕蓁","陳秀琴"].map(name => ({
-    id: `bq-sf-${name}`, district: "寶慶區", ageGroup: "", gender: "姊妹", identity: "福音朋友", name, notes: name === "陳秀琴" ? "王淑君姐妹的婆婆" : ""
+  // 寶慶區 福音朋友與未得救家人
+  ...["姚晴徽","陳仕蓁"].map(name => ({
+    id: `bq-sf-${name}`, district: "寶慶區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
+  { id: `bq-fam-陳秀琴`, district: "寶慶區", ageGroup: "", gender: "女介", identity: "聖徒未得救的家人", name: "陳秀琴", notes: "王淑君姐妹的婆婆" },
 
   // 自強區 弟兄 聖徒
   ...["陳逸峰","鄭勝忠","齊文駿","陳鴻琩","劉文邦","劉得寬","鄭志成"].map(name => ({
     id: `zq-b-${name}`, district: "自強區", ageGroup: "", gender: "弟兄", identity: "聖徒", name, notes: ""
   })),
-  // 自強區 弟兄 福音朋友
+  // 自強區 福音朋友 (男介)
   ...["陳庭成","蔡忠穆","吳昀霖","陳楚恩","王建中","許庭豪"].map(name => ({
-    id: `zq-bf-${name}`, district: "自強區", ageGroup: "", gender: "弟兄", identity: "福音朋友", name, notes: ""
+    id: `zq-bf-${name}`, district: "自強區", ageGroup: "", gender: "男介", identity: "福音朋友", name, notes: ""
   })),
   // 自強區 姊妹 聖徒
   ...["陳蔡怡君","鄭王苔菱","齊沈采蓉","陳潘婉柔","鄭安秀","徐李甜琇","王蔡宜倩","黃姿榳","潘育華","王佳怡","李函穎","康秀娜","楊主恩","林香圻","聶少秋","熊娟賢","廖敏玲","張鷹梅","葉虹妘"].map(name => ({
     id: `zq-s-${name}`, district: "自強區", ageGroup: "", gender: "姊妹", identity: "聖徒", name, notes: ""
   })),
-  // 自強區 姊妹 福音朋友
+  // 自強區 福音朋友 (女介)
   ...["曾靖元","朱芸","玥宇","邱思旋","吾羽","王嘉瑜","張家瑋","陳家慧","吳亭葶","羅心廷"].map(name => ({
-    id: `zq-sf-${name}`, district: "自強區", ageGroup: "", gender: "姊妹", identity: "福音朋友", name, notes: ""
+    id: `zq-sf-${name}`, district: "自強區", ageGroup: "", gender: "女介", identity: "福音朋友", name, notes: ""
   })),
 
   // 青職
@@ -107,7 +106,7 @@ const INITIAL_ROSTER = [
   { id: "qz-13", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "葉芬", notes: "體大-運動保健" },
   { id: "qz-14", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "黃宣雅", notes: "中央光電" },
   { id: "qz-15", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "陳映", notes: "大三 (國防護理)" },
-  { id: "qz-16", district: "", ageGroup: "大專", gender: "弟兄", identity: "福音朋友", name: "裴佳羿", notes: "大三" },
+  { id: "qz-16", district: "", ageGroup: "大專", gender: "男介", identity: "福音朋友", name: "裴佳羿", notes: "大三" },
   { id: "qz-17", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "張艾綸", notes: "大二 (致理)" },
   { id: "qz-18", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "張馨云", notes: "大二 (成大)" },
   { id: "qz-19", district: "", ageGroup: "大專", gender: "弟兄", identity: "聖徒", name: "陳逸嘉", notes: "大二 (交大)" },
@@ -123,7 +122,7 @@ const INITIAL_ROSTER = [
   { id: "qs-j3-2", district: "", ageGroup: "國中", gender: "姊妹", identity: "聖徒", name: "鄭莉茗", notes: "國三" },
   { id: "qs-j3-3", district: "", ageGroup: "國中", gender: "弟兄", identity: "聖徒", name: "黃楷睿", notes: "國三 (慈文)" },
   { id: "qs-j2-1", district: "", ageGroup: "國中", gender: "弟兄", identity: "聖徒", name: "王博睿", notes: "國二" },
-  ...["吳秉諺","黃毓琦","黃湘晴","邱卉瑜","范雋奕","江羽揚","陳祐揚"].map(name => ({ id: `qs-f-${name}`, district: "", ageGroup: "國中", gender: "弟兄", identity: "福音朋友", name, notes: "青少年福音朋友" })),
+  ...["吳秉諺","黃毓琦","黃湘晴","邱卉瑜","范雋奕","江羽揚","陳祐揚"].map(name => ({ id: `qs-f-${name}`, district: "", ageGroup: "國中", gender: "男介", identity: "福音朋友", name, notes: "青少年福音朋友" })),
 
   // 兒童
   ...["邱子綾","王苡晴","張新城","柯宇樂","張丞翊","陳云","李每拿","張尹榛","張睿","徐宇睿"].map(name => ({ id: `child-${name}`, district: "", ageGroup: "兒童", gender: "姊妹", identity: "聖徒", name, notes: "學齡" })),
@@ -135,7 +134,7 @@ const INITIAL_ROSTER = [
   { id: "child-p1", district: "", ageGroup: "兒童", gender: "弟兄", identity: "聖徒", name: "彭定偉", notes: "小三" },
   ...["何家悅","李芮嘉","梁庭萱"].map(name => ({ id: `child-g1-${name}`, district: "", ageGroup: "兒童", gender: "姊妹", identity: "聖徒", name, notes: "小一" })),
   ...["陳詠恩","陳詠約","邱苡琳","甘慕淳","甘心","賴享主","賴享恩","潘陳悅皿","潘陳悅安","陳慕","陳晞","邱彥愷","徐妤安","徐妤心","徐裕森","陳妍霏","侯泓羽","侯泓芸","李睿恩","楊恩旭","楊恩碩","王真言","王真依","林容瑤","葉睿丞","程熙","徐宇芯"].map(name => ({ id: `child-pre-${name}`, district: "", ageGroup: "學齡前", gender: "姊妹", identity: "聖徒", name, notes: "學齡前" })),
-  ...["陳昱蓉","許芷","李品初","張家琦","林洵薇","賴彥彬","林子涵","林渃禾","張煜青","李玉婷"].map(name => ({ id: `child-f-${name}`, district: "", ageGroup: "兒童", gender: "姊妹", identity: "福音朋友", name, notes: name.includes("品格園") ? "品格園" : "兒童福音朋友" }))
+  ...["陳昱蓉","許芷","李品初","張家琦","林洵薇","賴彥彬","林子涵","林渃禾","張煜青","李玉婷"].map(name => ({ id: `child-f-${name}`, district: "", ageGroup: "兒童", gender: "女介", identity: "福音朋友", name, notes: name.includes("品格園") ? "品格園" : "兒童福音朋友" }))
 ];
 
 const INITIAL_PRAYER_ITEMS = [
@@ -226,9 +225,15 @@ C. 藝文特區、永安路、開南大學（五週開展 12/15-1/18）`,
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('roster');
-  const [prayerSubView, setPrayerSubView] = useState('items');
-  const [viewMode, setViewMode] = useState('card');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('prayer_wall_active_tab') || 'roster';
+  });
+  const [prayerSubView, setPrayerSubView] = useState(() => {
+    return localStorage.getItem('prayer_wall_prayer_subview') || 'items';
+  });
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('prayer_wall_view_mode') || 'card';
+  });
 
   const [roster, setRoster] = useState(() => {
     const saved = localStorage.getItem('prayer_wall_roster');
@@ -249,11 +254,11 @@ export default function App() {
     return localStorage.getItem('prayer_wall_co_editor_name') || '';
   });
 
-  const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([
     { id: 'u-1', name: "交通配搭中", status: "線上活動中", avatarBg: "bg-[#8C6D58]", isSelf: false, lastActive: "線上" }
   ]);
   const [isSelfOnline, setIsSelfOnline] = useState(true);
+  const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
   const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -265,21 +270,13 @@ export default function App() {
 
   const timerRef = useRef(null);
 
-  useEffect(() => {
-    localStorage.setItem('prayer_wall_roster', JSON.stringify(roster));
-  }, [roster]);
-
-  useEffect(() => {
-    localStorage.setItem('prayer_wall_prayer_items', JSON.stringify(prayerItems));
-  }, [prayerItems]);
-
-  useEffect(() => {
-    localStorage.setItem('prayer_wall_logs', JSON.stringify(logs));
-  }, [logs]);
-
-  useEffect(() => {
-    localStorage.setItem('prayer_wall_co_editor_name', coEditorName);
-  }, [coEditorName]);
+  useEffect(() => { localStorage.setItem('prayer_wall_active_tab', activeTab); }, [activeTab]);
+  useEffect(() => { localStorage.setItem('prayer_wall_prayer_subview', prayerSubView); }, [prayerSubView]);
+  useEffect(() => { localStorage.setItem('prayer_wall_view_mode', viewMode); }, [viewMode]);
+  useEffect(() => { localStorage.setItem('prayer_wall_roster', JSON.stringify(roster)); }, [roster]);
+  useEffect(() => { localStorage.setItem('prayer_wall_prayer_items', JSON.stringify(prayerItems)); }, [prayerItems]);
+  useEffect(() => { localStorage.setItem('prayer_wall_logs', JSON.stringify(logs)); }, [logs]);
+  useEffect(() => { localStorage.setItem('prayer_wall_co_editor_name', coEditorName); }, [coEditorName]);
 
   // 線上狀態管理
   useEffect(() => {
@@ -300,10 +297,15 @@ export default function App() {
     }
   }, [coEditorName, isSelfOnline]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('全部');
-  const [selectedIdentity, setSelectedIdentity] = useState('全部');
-  const [selectedAge, setSelectedAge] = useState('全部');
+  const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('prayer_wall_search') || '');
+  const [selectedDistrict, setSelectedDistrict] = useState(() => localStorage.getItem('prayer_wall_district') || '全部');
+  const [selectedIdentity, setSelectedIdentity] = useState(() => localStorage.getItem('prayer_wall_identity') || '全部');
+  const [selectedAge, setSelectedAge] = useState(() => localStorage.getItem('prayer_wall_age') || '全部');
+
+  useEffect(() => { localStorage.setItem('prayer_wall_search', searchQuery); }, [searchQuery]);
+  useEffect(() => { localStorage.setItem('prayer_wall_district', selectedDistrict); }, [selectedDistrict]);
+  useEffect(() => { localStorage.setItem('prayer_wall_identity', selectedIdentity); }, [selectedIdentity]);
+  useEffect(() => { localStorage.setItem('prayer_wall_age', selectedAge); }, [selectedAge]);
 
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [newMember, setNewMember] = useState({
@@ -409,7 +411,7 @@ export default function App() {
 
   // CSV 匯出與匯入
   const handleExportCSV = () => {
-    const headers = "大分類(區別),年齡層,性別,身份,姓名,備註\n";
+    const headers = "大分類(區別),年齡層,稱謂,身份,姓名,備註\n";
     const rows = roster.map(r => `"${r.district}","${r.ageGroup}","${r.gender}","${r.identity}","${r.name}","${r.notes}"`).join("\n");
     const blob = new Blob(["\uFEFF" + headers + rows], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -477,6 +479,12 @@ export default function App() {
       showToast("已新增代禱事項！");
     }
     setIsPrayerModalOpen(false);
+  };
+
+  const getIdentityBadgeClass = (identity) => {
+    if (identity === '福音朋友') return 'bg-[#E8F0E8] text-[#4E6B4E]';
+    if (identity === '聖徒未得救的家人') return 'bg-[#FFF3E0] text-[#D97706]';
+    return 'bg-[#F2EBE4] text-[#7A6455]';
   };
 
   return (
@@ -602,13 +610,18 @@ export default function App() {
 
               <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
                 <span className="text-[11px] text-[#9E948A] whitespace-nowrap px-1">身份:</span>
-                {['全部', '聖徒', '福音朋友'].map(i => (
+                {[
+                  { label: '全部', value: '全部' },
+                  { label: '聖徒', value: '聖徒' },
+                  { label: '未得救家人', value: '聖徒未得救的家人' },
+                  { label: '福音朋友', value: '福音朋友' }
+                ].map(i => (
                   <button
-                    key={i}
-                    onClick={() => setSelectedIdentity(i)}
-                    className={`px-2.5 py-1 rounded-full whitespace-nowrap text-xs transition-all ${selectedIdentity === i ? 'bg-[#768A75] text-white shadow-xs' : 'bg-[#F4EFEA] text-[#6B625B] hover:bg-[#EBE4D8]'}`}
+                    key={i.value}
+                    onClick={() => setSelectedIdentity(i.value)}
+                    className={`px-2.5 py-1 rounded-full whitespace-nowrap text-xs transition-all ${selectedIdentity === i.value ? 'bg-[#768A75] text-white shadow-xs' : 'bg-[#F4EFEA] text-[#6B625B] hover:bg-[#EBE4D8]'}`}
                   >
-                    {i}
+                    {i.label}
                   </button>
                 ))}
                 <span className="text-[11px] text-[#9E948A] whitespace-nowrap px-1 pl-2">年齡:</span>
@@ -655,14 +668,13 @@ export default function App() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${item.identity === '福音朋友' ? 'bg-[#E8F0E8] text-[#4E6B4E]' : 'bg-[#F2EBE4] text-[#7A6455]'}`}>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${getIdentityBadgeClass(item.identity)}`}>
                           {item.identity}
                         </span>
                         {item.district && <span className="text-[10px] text-[#A0958B]">{item.district}</span>}
                       </div>
-                      <div className="font-medium text-sm text-[#2C2725] font-serif mb-1 flex items-center justify-between">
-                        <span>{item.name}</span>
-                        <MoreVertical className="w-3 h-3 text-[#A0958B] opacity-40 group-hover:opacity-100" />
+                      <div className="font-medium text-sm text-[#2C2725] font-serif mb-1">
+                        {item.name}
                       </div>
                       <div className="flex items-center gap-1 text-[10px] text-[#8C827A]">
                         <span>{item.gender}</span>
@@ -695,11 +707,17 @@ export default function App() {
                         共 {filteredRoster.length} 人
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
                       <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
                         <div className="font-medium text-[#7A6455] mb-1">聖徒 ({filteredRoster.filter(i => i.identity === '聖徒').length})</div>
                         <div className="text-[#5A524D] leading-relaxed">
                           {filteredRoster.filter(i => i.identity === '聖徒').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
+                        </div>
+                      </div>
+                      <div className="bg-[#FFF8F0] p-2 rounded-lg">
+                        <div className="font-medium text-[#D97706] mb-1">未得救家人 ({filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length})</div>
+                        <div className="text-[#5A524D] leading-relaxed">
+                          {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
                         </div>
                       </div>
                       <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
@@ -723,11 +741,17 @@ export default function App() {
                             共 {distItems.length} 人
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="grid grid-cols-3 gap-2 text-xs">
                           <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
                             <div className="font-medium text-[#7A6455] mb-1">聖徒 ({distItems.filter(i => i.identity === '聖徒').length})</div>
                             <div className="text-[#5A524D] leading-relaxed">
                               {distItems.filter(i => i.identity === '聖徒').map(i => i.name).join('、') || '無'}
+                            </div>
+                          </div>
+                          <div className="bg-[#FFF8F0] p-2 rounded-lg">
+                            <div className="font-medium text-[#D97706] mb-1">未得救家人 ({distItems.filter(i => i.identity === '聖徒未得救的家人').length})</div>
+                            <div className="text-[#5A524D] leading-relaxed">
+                              {distItems.filter(i => i.identity === '聖徒未得救的家人').map(i => i.name).join('、') || '無'}
                             </div>
                           </div>
                           <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
@@ -799,7 +823,6 @@ export default function App() {
                         </span>
                         <h3 className="font-serif font-medium text-base text-[#2C2725] mt-1">{item.title}</h3>
                       </div>
-                      <MoreVertical className="w-4 h-4 text-[#A0958B]" />
                     </div>
 
                     <div className="text-xs text-[#4A423E] leading-relaxed whitespace-pre-wrap font-sans">
@@ -901,13 +924,13 @@ export default function App() {
             <div className="text-center border-b border-[#EBE4D8] pb-2 mb-2">
               <h4 className="font-serif font-medium text-base text-[#2C2725]">{activeRosterActionItem.name}</h4>
               <p className="text-xs text-[#8C827A]">
-                {activeRosterActionItem.district || '跨區'} • {activeRosterActionItem.identity} {activeRosterActionItem.notes ? `(${activeRosterActionItem.notes})` : ''}
+                {activeRosterActionItem.district || '跨區'} • {activeRosterActionItem.identity} ({activeRosterActionItem.gender}) {activeRosterActionItem.notes ? `- ${activeRosterActionItem.notes}` : ''}
               </p>
             </div>
 
             <button
               onClick={() => {
-                const text = `${activeRosterActionItem.name} (${activeRosterActionItem.district || '跨區'} ${activeRosterActionItem.identity}) ${activeRosterActionItem.notes}`;
+                const text = `${activeRosterActionItem.name} (${activeRosterActionItem.district || '跨區'} ${activeRosterActionItem.identity} ${activeRosterActionItem.gender}) ${activeRosterActionItem.notes}`;
                 handleCopyText(text, activeRosterActionItem.name);
                 setActiveRosterActionItem(null);
               }}
@@ -1066,22 +1089,22 @@ export default function App() {
             </div>
 
             <form onSubmit={handleEditMemberSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-[#6E645D] mb-1">大分類 (區別)</label>
-                <select 
-                  value={editingRosterMember.district}
-                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, district: e.target.value })}
-                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
-                >
-                  <option value="">(無/跨區)</option>
-                  <option value="信光區">信光區</option>
-                  <option value="藝文區">藝文區</option>
-                  <option value="寶慶區">寶慶區</option>
-                  <option value="自強區">自強區</option>
-                </select>
-              </div>
-
               <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[#6E645D] mb-1">大分類 (區別)</label>
+                  <select 
+                    value={editingRosterMember.district}
+                    onChange={(e) => setEditingRosterMember({ ...editingRosterMember, district: e.target.value })}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                  >
+                    <option value="">(無/跨區)</option>
+                    <option value="信光區">信光區</option>
+                    <option value="藝文區">藝文區</option>
+                    <option value="寶慶區">寶慶區</option>
+                    <option value="自強區">自強區</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-[#6E645D] mb-1">年齡層</label>
                   <select 
@@ -1098,29 +1121,51 @@ export default function App() {
                     <option value="學齡前">學齡前</option>
                   </select>
                 </div>
+              </div>
+
+              {/* 身份 (左) 與 稱謂 (右) 同一行 */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[#6E645D] mb-1">性別</label>
+                  <label className="block text-[#6E645D] mb-1">身份</label>
+                  <select 
+                    value={editingRosterMember.identity}
+                    onChange={(e) => {
+                      const idVal = e.target.value;
+                      const defaultGender = idVal === '聖徒' ? '弟兄' : '男介';
+                      setEditingRosterMember({ 
+                        ...editingRosterMember, 
+                        identity: idVal,
+                        gender: defaultGender
+                      });
+                    }}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-2.5 py-2 text-xs focus:outline-none font-medium text-[#8C6D58]"
+                  >
+                    <option value="聖徒">聖徒</option>
+                    <option value="聖徒未得救的家人">未得救家人</option>
+                    <option value="福音朋友">福音朋友</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[#6E645D] mb-1">稱謂</label>
                   <select 
                     value={editingRosterMember.gender}
                     onChange={(e) => setEditingRosterMember({ ...editingRosterMember, gender: e.target.value })}
-                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-2.5 py-2 text-xs focus:outline-none font-medium text-[#2C2725]"
                   >
-                    <option value="弟兄">弟兄</option>
-                    <option value="姊妹">姊妹</option>
+                    {editingRosterMember.identity === '聖徒' ? (
+                      <>
+                        <option value="弟兄">弟兄</option>
+                        <option value="姊妹">姊妹</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="男介">男介</option>
+                        <option value="女介">女介</option>
+                      </>
+                    )}
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[#6E645D] mb-1">身份</label>
-                <select 
-                  value={editingRosterMember.identity}
-                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, identity: e.target.value })}
-                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
-                >
-                  <option value="聖徒">聖徒 (聖徒未得救家人)</option>
-                  <option value="福音朋友">福音朋友</option>
-                </select>
               </div>
 
               <div>
@@ -1236,21 +1281,21 @@ export default function App() {
             </div>
 
             <form onSubmit={handleAddMemberSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-[#6E645D] mb-1">大分類 (區別)</label>
-                <select 
-                  value={newMember.district}
-                  onChange={(e) => setNewMember({ ...newMember, district: e.target.value })}
-                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
-                >
-                  <option value="信光區">信光區</option>
-                  <option value="藝文區">藝文區</option>
-                  <option value="寶慶區">寶慶區</option>
-                  <option value="自強區">自強區</option>
-                </select>
-              </div>
-
               <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[#6E645D] mb-1">大分類 (區別)</label>
+                  <select 
+                    value={newMember.district}
+                    onChange={(e) => setNewMember({ ...newMember, district: e.target.value })}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                  >
+                    <option value="信光區">信光區</option>
+                    <option value="藝文區">藝文區</option>
+                    <option value="寶慶區">寶慶區</option>
+                    <option value="自強區">自強區</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-[#6E645D] mb-1">年齡層</label>
                   <select 
@@ -1267,29 +1312,51 @@ export default function App() {
                     <option value="學齡前">學齡前</option>
                   </select>
                 </div>
+              </div>
+
+              {/* 身份 (左) 與 稱謂 (右) 同一行 */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[#6E645D] mb-1">性別</label>
+                  <label className="block text-[#6E645D] mb-1">身份</label>
+                  <select 
+                    value={newMember.identity}
+                    onChange={(e) => {
+                      const idVal = e.target.value;
+                      const defaultGender = idVal === '聖徒' ? '弟兄' : '男介';
+                      setNewMember({ 
+                        ...newMember, 
+                        identity: idVal,
+                        gender: defaultGender
+                      });
+                    }}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-2.5 py-2 text-xs focus:outline-none font-medium text-[#8C6D58]"
+                  >
+                    <option value="聖徒">聖徒</option>
+                    <option value="聖徒未得救的家人">未得救家人</option>
+                    <option value="福音朋友">福音朋友</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[#6E645D] mb-1">稱謂</label>
                   <select 
                     value={newMember.gender}
                     onChange={(e) => setNewMember({ ...newMember, gender: e.target.value })}
-                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-2.5 py-2 text-xs focus:outline-none font-medium text-[#2C2725]"
                   >
-                    <option value="弟兄">弟兄</option>
-                    <option value="姊妹">姊妹</option>
+                    {newMember.identity === '聖徒' ? (
+                      <>
+                        <option value="弟兄">弟兄</option>
+                        <option value="姊妹">姊妹</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="男介">男介</option>
+                        <option value="女介">女介</option>
+                      </>
+                    )}
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[#6E645D] mb-1">身份</label>
-                <select 
-                  value={newMember.identity}
-                  onChange={(e) => setNewMember({ ...newMember, identity: e.target.value })}
-                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
-                >
-                  <option value="聖徒">聖徒 (聖徒未得救家人)</option>
-                  <option value="福音朋友">福音朋友</option>
-                </select>
               </div>
 
               <div>
