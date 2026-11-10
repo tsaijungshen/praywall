@@ -671,42 +671,67 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW MODE 2: SUMMARY TABLE */}
+       {/* VIEW MODE 2: SUMMARY TABLE */}
             {viewMode === 'summary' && (
               <div className="space-y-4">
-                {['信光區', '藝文區', '寶慶區', '自強區'].map(dist => {
-                  const distItems = filteredRoster.filter(r => r.district === dist);
-                  if (distItems.length === 0) return null;
-
-                  return (
-                    <div key={dist} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
-                      <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2 mb-2">
-                        <span className="font-serif font-medium text-sm text-[#2C2725]">{dist}</span>
-                        <span className="text-xs text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
-                          共 {distItems.length} 人
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
-                          <div className="font-medium text-[#7A6455] mb-1">聖徒 ({distItems.filter(i => i.identity === '聖徒').length})</div>
-                          <div className="text-[#5A524D] leading-relaxed">
-                            {distItems.filter(i => i.identity === '聖徒').map(i => i.name).join('、') || '無'}
-                          </div>
+                {/* 當區別選「全部」且篩選了特定年齡層時，以年齡層/組別來彙整顯示 */}
+                {selectedDistrict === '全部' && selectedAge !== '全部' ? (
+                  <div className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2 mb-2">
+                      <span className="font-serif font-medium text-sm text-[#2C2725]">年齡層篩選總表：{selectedAge}</span>
+                      <span className="text-xs text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
+                        共 {filteredRoster.length} 人
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
+                        <div className="font-medium text-[#7A6455] mb-1">聖徒 ({filteredRoster.filter(i => i.identity === '聖徒').length})</div>
+                        <div className="text-[#5A524D] leading-relaxed">
+                          {filteredRoster.filter(i => i.identity === '聖徒').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
                         </div>
-                        <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
-                          <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({distItems.filter(i => i.identity === '福音朋友').length})</div>
-                          <div className="text-[#5A524D] leading-relaxed">
-                            {distItems.filter(i => i.identity === '福音朋友').map(i => i.name).join('、') || '無'}
-                          </div>
+                      </div>
+                      <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
+                        <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({filteredRoster.filter(i => i.identity === '福音朋友').length})</div>
+                        <div className="text-[#5A524D] leading-relaxed">
+                          {filteredRoster.filter(i => i.identity === '福音朋友').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ) : (
+                  /* 預設四大分區總表 */
+                  ['信光區', '藝文區', '寶慶區', '自強區'].map(dist => {
+                    const distItems = filteredRoster.filter(r => r.district === dist);
+                    if (distItems.length === 0) return null;
+
+                    return (
+                      <div key={dist} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
+                        <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2 mb-2">
+                          <span className="font-serif font-medium text-sm text-[#2C2725]">{dist}</span>
+                          <span className="text-xs text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
+                            共 {distItems.length} 人
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
+                            <div className="font-medium text-[#7A6455] mb-1">聖徒 ({distItems.filter(i => i.identity === '聖徒').length})</div>
+                            <div className="text-[#5A524D] leading-relaxed">
+                              {distItems.filter(i => i.identity === '聖徒').map(i => i.name).join('、') || '無'}
+                            </div>
+                          </div>
+                          <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
+                            <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({distItems.filter(i => i.identity === '福音朋友').length})</div>
+                            <div className="text-[#5A524D] leading-relaxed">
+                              {distItems.filter(i => i.identity === '福音朋友').map(i => i.name).join('、') || '無'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
-          </div>
-        )}
 
         {/* TAB 2: 代禱事項 */}
         {activeTab === 'items' && (
