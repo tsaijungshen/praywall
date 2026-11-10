@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Heart, 
   Search, 
@@ -14,15 +14,14 @@ import {
   Clock, 
   Grid, 
   List, 
-  ChevronRight, 
-  Filter, 
   X, 
   Sparkles,
-  FileSpreadsheet,
-  Share2
+  Share2,
+  Trash2,
+  MoreVertical
 } from 'lucide-react';
 
-// Initial Data parsing from user prompt
+// 預設資料庫
 const INITIAL_ROSTER = [
   // 信光區 弟兄 聖徒
   ...["左其浩","林建安","蔡雨桐","陳子謙","陳秋雄","黃才育","陳明宏","李冠融","廖文毅","姜心誠","黃睿聰","呂穗枝","呂亦揚"].map(name => ({
@@ -112,7 +111,7 @@ const INITIAL_ROSTER = [
   { id: "qz-17", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "張艾綸", notes: "大二 (致理)" },
   { id: "qz-18", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "張馨云", notes: "大二 (成大)" },
   { id: "qz-19", district: "", ageGroup: "大專", gender: "弟兄", identity: "聖徒", name: "陳逸嘉", notes: "大二 (交大)" },
-  { id: "qz-[#qz-20]", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "鍾念恩", notes: "專一 (馬偕護專淡水)" },
+  { id: "qz-20", district: "", ageGroup: "大專", gender: "姊妹", identity: "聖徒", name: "鍾念恩", notes: "專一 (馬偕護專淡水)" },
 
   // 青少年
   ...["林中天","張育碩","歐以樂","張奇恩","廖辰晟","畢勝"].map(name => ({ id: `qs-b-g3-${name}`, district: "", ageGroup: "高中", gender: "弟兄", identity: "聖徒", name, notes: "高三" })),
@@ -226,8 +225,6 @@ C. 藝文特區、永安路、開南大學（五週開展 12/15-1/18）`,
   }
 ];
 
-const INITIAL_LOGS = [];
-
 export default function App() {
   const [activeTab, setActiveTab] = useState('roster');
   const [prayerSubView, setPrayerSubView] = useState('items');
@@ -245,7 +242,7 @@ export default function App() {
 
   const [logs, setLogs] = useState(() => {
     const saved = localStorage.getItem('prayer_wall_logs');
-    return saved ? JSON.parse(saved) : INITIAL_LOGS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [coEditorName, setCoEditorName] = useState(() => {
@@ -257,6 +254,14 @@ export default function App() {
   const [isSelfOnline, setIsSelfOnline] = useState(false);
   const [isOnlineModalOpen, setIsOnlineModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // 長按與彈窗選單狀態
+  const [activeRosterActionItem, setActiveRosterActionItem] = useState(null);
+  const [activePrayerActionItem, setActivePrayerActionItem] = useState(null);
+  const [editingRosterMember, setEditingRosterMember] = useState(null);
+  const [deleteConfirmMember, setDeleteConfirmMember] = useState(null);
+
+  const timerRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('prayer_wall_roster', JSON.stringify(roster));
@@ -302,24 +307,6 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 2500);
   };
 
-  useEffect(() => {
-    if (coEditorName.trim() && isSelfOnline) {
-      setOnlineUsers(prev => {
-        const exists = prev.some(u => u.isSelf);
-        if (exists) {
-          return prev.map(u => u.isSelf ? { ...u, name: coEditorName.trim() } : u);
-        } else {
-          return [
-            ...prev,
-            { id: 'u-self', name: coEditorName.trim(), status: "線上活動中", avatarBg: "bg-[#8C6D58]", isSelf: true, lastActive: "剛剛" }
-          ];
-        }
-      });
-    } else {
-      setOnlineUsers(prev => prev.filter(u => !u.isSelf));
-    }
-  }, [coEditorName, isSelfOnline]);
-
   const addLog = (actionText) => {
     const newLog = {
       id: `l-${Date.now()}`,
@@ -330,33 +317,44 @@ export default function App() {
     setLogs(prev => [newLog, ...prev]);
   };
 
-  // 智慧解鎖篩選邏輯：支援全區域與特定年齡層組合
+  // 長按處理函式
+  const handleTouchStart = (item, type) => {
+    timerRef.current = setTimeout(() => {
+      if (type === 'roster') {
+        setActiveRosterActionItem(item);
+      } else if (type === 'prayer') {
+        setActivePrayerActionItem(item);
+      }
+      if (navigator.vibrate) navigator.vibrate(50); // 觸覺回饋
+    }, 500); // 長按 500ms 觸發
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+  };
+
+  // 名單過濾邏輯
   const filteredRoster = useMemo(() => {
     return roster.filter(item => {
-      if (selectedDistrict !== '全部') {
-        if (item.district !== selectedDistrict) return false;
-      }
-      
+      if (selectedDistrict !== '全部' && item.district !== selectedDistrict) return false;
       if (selectedIdentity !== '全部' && item.identity !== selectedIdentity) return false;
-      
-      if (selectedAge !== '全部') {
-        if (!item.ageGroup || !item.ageGroup.includes(selectedAge)) {
-          return false;
-        }
-      }
+      if (selectedAge !== '全部' && (!item.ageGroup || !item.ageGroup.includes(selectedAge))) return false;
 
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(query);
         const matchNotes = item.notes.toLowerCase().includes(query);
-        const matchDistrict = item.district.toLowerCase().includes(query);
-        const matchAge = item.ageGroup.toLowerCase().includes(query);
+        const matchDistrict = item.district ? item.district.toLowerCase().includes(query) : false;
+        const matchAge = item.ageGroup ? item.ageGroup.toLowerCase().includes(query) : false;
         if (!matchName && !matchNotes && !matchDistrict && !matchAge) return false;
       }
       return true;
     });
   }, [roster, selectedDistrict, selectedIdentity, selectedAge, searchQuery]);
 
+  // 名單處理：新增
   const handleAddMemberSubmit = (e) => {
     e.preventDefault();
     if (!newMember.name.trim()) return;
@@ -369,17 +367,36 @@ export default function App() {
     setRoster(prev => [created, ...prev]);
     addLog(`新增代禱名單: ${created.name} (${created.district || '未分類'})`);
     setIsAddMemberOpen(false);
-    setNewMember({
-      district: '信光區',
-      ageGroup: '',
-      gender: '弟兄',
-      identity: '聖徒',
-      name: '',
-      notes: ''
-    });
+    setNewMember({ district: '信光區', ageGroup: '', gender: '弟兄', identity: '聖徒', name: '', notes: '' });
     showToast(`已成功新增名單：${created.name}`);
   };
 
+  // 名單處理：編輯儲存
+  const handleEditMemberSubmit = (e) => {
+    e.preventDefault();
+    if (!editingRosterMember || !editingRosterMember.name.trim()) return;
+
+    setRoster(prev => prev.map(m => m.id === editingRosterMember.id ? editingRosterMember : m));
+    addLog(`更正名單資訊: ${editingRosterMember.name}`);
+    setEditingRosterMember(null);
+    showToast(`已更正 ${editingRosterMember.name} 的資料`);
+  };
+
+  // 名單處理：刪除
+  const handleDeleteMember = (member) => {
+    setRoster(prev => prev.filter(m => m.id !== member.id));
+    addLog(`刪除代禱名單: ${member.name}`);
+    setDeleteConfirmMember(null);
+    showToast(`已刪除名單：${member.name}`);
+  };
+
+  // 複製文字
+  const handleCopyText = (text, title) => {
+    navigator.clipboard.writeText(text);
+    showToast(`已複製「${title}」內容`);
+  };
+
+  // CSV 匯出與匯入
   const handleExportCSV = () => {
     const headers = "大分類(區別),年齡層,性別,身份,姓名,備註\n";
     const rows = roster.map(r => `"${r.district}","${r.ageGroup}","${r.gender}","${r.identity}","${r.name}","${r.notes}"`).join("\n");
@@ -403,10 +420,7 @@ export default function App() {
       try {
         const text = evt.target.result;
         const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length <= 1) {
-          showToast("檔案格式錯誤或內容為空");
-          return;
-        }
+        if (lines.length <= 1) return;
 
         const newItems = [];
         for (let i = 1; i < lines.length; i++) {
@@ -436,6 +450,7 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  // 儲存代禱事項
   const handleSavePrayerItem = (e) => {
     e.preventDefault();
     if (!currentPrayerItem.title.trim() || !currentPrayerItem.content.trim()) return;
@@ -443,30 +458,21 @@ export default function App() {
     const today = new Date().toISOString().slice(0, 10);
     if (currentPrayerItem.id) {
       setPrayerItems(prev => prev.map(p => p.id === currentPrayerItem.id ? { ...currentPrayerItem, updatedAt: today } : p));
-      addLog(`更新了代禱事項: 【${currentPrayerItem.title}】`);
+      addLog(`更新代禱事項: 【${currentPrayerItem.title}】`);
       showToast("代禱事項已更新！");
     } else {
-      const newItem = {
-        ...currentPrayerItem,
-        id: `p-${Date.now()}`,
-        updatedAt: today
-      };
+      const newItem = { ...currentPrayerItem, id: `p-${Date.now()}`, updatedAt: today };
       setPrayerItems(prev => [newItem, ...prev]);
-      addLog(`新增了代禱事項: 【${newItem.title}】`);
+      addLog(`新增代禱事項: 【${newItem.title}】`);
       showToast("已新增代禱事項！");
     }
-
     setIsPrayerModalOpen(false);
-  };
-
-  const handleCopyText = (text, title) => {
-    navigator.clipboard.writeText(text);
-    showToast(`已複製「${title}」內容`);
   };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#3D3735] font-sans flex flex-col selection:bg-[#E8DFC0] selection:text-[#3D3735]">
       
+      {/* Header */}
       <header className="sticky top-0 z-40 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#EBE4D8] px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center space-x-1.5 shrink-0">
@@ -505,30 +511,21 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-1.5 shrink-0">
-            <button
-              onClick={() => setIsOnlineModalOpen(true)}
-              className="flex items-center space-x-1 bg-[#E8F0E8] hover:bg-[#DCE8DC] px-2 py-1.5 rounded-full border border-[#CDE0CD] transition-colors"
-              title="查看線上配搭"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#4E6B4E] animate-pulse"></span>
-              <Users className="w-3.5 h-3.5 text-[#4E6B4E]" />
-              <span className="text-xs font-medium text-[#3A523A]">{onlineUsers.length}位</span>
-            </button>
-
             <button 
               onClick={() => setIsEditorModalOpen(true)}
               className="flex items-center space-x-1 text-xs bg-[#F4EFEA] hover:bg-[#EBE4D8] px-2 py-1.5 rounded-full border border-[#E6DDD0] transition-colors"
-              title="設定配搭名稱"
             >
               <User className="w-3.5 h-3.5 text-[#8C6D58]" />
-              <span className="text-[#5A524D] font-medium hidden sm:inline">{coEditorName || "尚未設定"}</span>
+              <span className="text-[#5A524D] font-medium hidden sm:inline">{coEditorName || "未設定"}</span>
             </button>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 max-w-lg w-full mx-auto pb-12 px-4 pt-4">
         
+        {/* TAB 1: ROSTER */}
         {activeTab === 'roster' && (
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
@@ -566,6 +563,7 @@ export default function App() {
               </div>
             </div>
 
+            {/* Filter Tags */}
             <div className="space-y-2 text-xs">
               <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-0.5">
                 <span className="text-[11px] text-[#9E948A] whitespace-nowrap px-1">區別:</span>
@@ -605,7 +603,7 @@ export default function App() {
             </div>
 
             <div className="flex items-center justify-between text-xs text-[#8C827A] pt-1 border-b border-[#EBE4D8] pb-2">
-              <div>共包含 <span className="font-semibold text-[#8C6D58]">{filteredRoster.length}</span> 位代禱對象</div>
+              <div>共包含 <span className="font-semibold text-[#8C6D58]">{filteredRoster.length}</span> 位 (可長按卡片編輯)</div>
               <div className="flex items-center space-x-2">
                 <label className="flex items-center space-x-1 cursor-pointer hover:text-[#3D3735]">
                   <Upload className="w-3.5 h-3.5 text-[#768A75]" />
@@ -620,11 +618,19 @@ export default function App() {
               </div>
             </div>
 
-            {/* VIEW MODE 1: CARD VIEW */}
+            {/* CARD VIEW WITH LONG-PRESS */}
             {viewMode === 'card' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {filteredRoster.map(item => (
-                  <div key={item.id} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3 shadow-xs hover:border-[#D5C9B8] transition-all flex flex-col justify-between relative group">
+                  <div 
+                    key={item.id}
+                    onTouchStart={() => handleTouchStart(item, 'roster')}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseDown={() => handleTouchStart(item, 'roster')}
+                    onMouseUp={handleTouchEnd}
+                    onMouseLeave={handleTouchEnd}
+                    className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3 shadow-xs hover:border-[#D5C9B8] transition-all flex flex-col justify-between relative group select-none cursor-pointer active:scale-98"
+                  >
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className={`text-[10px] px-1.5 py-0.5 rounded ${item.identity === '福音朋友' ? 'bg-[#E8F0E8] text-[#4E6B4E]' : 'bg-[#F2EBE4] text-[#7A6455]'}`}>
@@ -632,7 +638,10 @@ export default function App() {
                         </span>
                         {item.district && <span className="text-[10px] text-[#A0958B]">{item.district}</span>}
                       </div>
-                      <div className="font-medium text-sm text-[#2C2725] font-serif mb-1">{item.name}</div>
+                      <div className="font-medium text-sm text-[#2C2725] font-serif mb-1 flex items-center justify-between">
+                        <span>{item.name}</span>
+                        <MoreVertical className="w-3 h-3 text-[#A0958B] opacity-40 group-hover:opacity-100" />
+                      </div>
                       <div className="flex items-center gap-1 text-[10px] text-[#8C827A]">
                         <span>{item.gender}</span>
                         {item.ageGroup && (
@@ -653,7 +662,7 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW MODE 2: SUMMARY TABLE */}
+            {/* SUMMARY VIEW */}
             {viewMode === 'summary' && (
               <div className="space-y-4">
                 {selectedDistrict === '全部' && selectedAge !== '全部' ? (
@@ -715,11 +724,12 @@ export default function App() {
           </div>
         )}
 
+        {/* TAB 2: PRAYER ITEMS WITH LONG-PRESS */}
         {activeTab === 'items' && (
           <div className="space-y-4 animate-fade-in">
             <div className="flex flex-col gap-2 border-b border-[#EBE4D8] pb-3">
               <div className="flex items-center justify-between">
-                <h2 className="font-serif text-sm font-medium text-[#2C2725] tracking-wide">召會與肢體代禱事項</h2>
+                <h2 className="font-serif text-sm font-medium text-[#2C2725] tracking-wide">代禱事項 (可長按編輯)</h2>
                 <button 
                   onClick={() => {
                     setCurrentPrayerItem({ id: '', category: '召會行動', title: '', content: '' });
@@ -743,7 +753,7 @@ export default function App() {
                   onClick={() => setPrayerSubView('weeklySummary')}
                   className={`flex-1 py-1.5 rounded-lg text-center transition-all ${prayerSubView === 'weeklySummary' ? 'bg-[#FDFBF7] font-medium text-[#8C6D58] shadow-xs' : 'text-[#8C827A]'}`}
                 >
-                  每週最新一版紀錄彙整
+                  每週最新總彙整
                 </button>
               </div>
             </div>
@@ -751,7 +761,15 @@ export default function App() {
             {prayerSubView === 'items' ? (
               <div className="space-y-3">
                 {prayerItems.map(item => (
-                  <div key={item.id} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-4 shadow-xs relative">
+                  <div 
+                    key={item.id}
+                    onTouchStart={() => handleTouchStart(item, 'prayer')}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseDown={() => handleTouchStart(item, 'prayer')}
+                    onMouseUp={handleTouchEnd}
+                    onMouseLeave={handleTouchEnd}
+                    className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-4 shadow-xs relative select-none cursor-pointer hover:border-[#D5C9B8] transition-all"
+                  >
                     <div className="flex items-start justify-between border-b border-[#EBE4D8] pb-2 mb-2">
                       <div>
                         <span className="text-[10px] text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
@@ -759,25 +777,7 @@ export default function App() {
                         </span>
                         <h3 className="font-serif font-medium text-base text-[#2C2725] mt-1">{item.title}</h3>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <button 
-                          onClick={() => handleCopyText(`${item.title}\n\n${item.content}`, item.title)}
-                          className="p-1.5 text-[#8C827A] hover:text-[#8C6D58] hover:bg-[#F4EFEA] rounded-lg transition-colors"
-                          title="複製整篇"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setCurrentPrayerItem(item);
-                            setIsPrayerModalOpen(true);
-                          }}
-                          className="p-1.5 text-[#8C827A] hover:text-[#8C6D58] hover:bg-[#F4EFEA] rounded-lg transition-colors"
-                          title="編輯"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <MoreVertical className="w-4 h-4 text-[#A0958B]" />
                     </div>
 
                     <div className="text-xs text-[#4A423E] leading-relaxed whitespace-pre-wrap font-sans">
@@ -785,14 +785,8 @@ export default function App() {
                     </div>
 
                     <div className="mt-3 pt-2 border-t border-[#F2EBE4] text-[10px] text-[#A0958B] flex justify-between items-center">
-                      <span>最後更新日期: {item.updatedAt}</span>
-                      <button 
-                        onClick={() => handleCopyText(`${item.title}\n\n${item.content}`, item.title)}
-                        className="text-[#8C6D58] flex items-center space-x-1 hover:underline"
-                      >
-                        <Share2 className="w-3 h-3" />
-                        <span>快速分享</span>
-                      </button>
+                      <span>最後更新: {item.updatedAt}</span>
+                      <span className="text-[#8C6D58] text-[10px]">長按編輯 / 複製</span>
                     </div>
                   </div>
                 ))}
@@ -834,6 +828,7 @@ export default function App() {
           </div>
         )}
 
+        {/* TAB 3: LOGS */}
         {activeTab === 'logs' && (
           <div className="space-y-4 animate-fade-in">
             <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2">
@@ -866,6 +861,7 @@ export default function App() {
 
       </main>
 
+      {/* Floating Add Button for Roster */}
       {activeTab === 'roster' && (
         <button 
           onClick={() => setIsAddMemberOpen(true)}
@@ -876,134 +872,273 @@ export default function App() {
         </button>
       )}
 
-      {isEditorModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-serif font-medium text-base text-[#2C2725]">設定配搭名稱</h3>
-              <button 
-                onClick={() => {
-                  if (!coEditorName.trim()) {
-                    showToast("提醒：尚未填寫配搭名稱，更新將顯示為『尚未設定』");
-                  }
-                  setIsEditorModalOpen(false);
-                }} 
-                className="text-[#A0958B] hover:text-[#3D3735]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-xs text-[#8C827A] mb-4">請輸入您的姓名/稱呼，以便配搭們識別彼此的更新紀錄。</p>
-            <input 
-              type="text"
-              value={coEditorName}
-              onChange={(e) => setCoEditorName(e.target.value)}
-              placeholder="例如: 張弟兄 / 莊姊妹"
-              className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#8C6D58] mb-3"
-            />
-
-            {coEditorName.trim() && (
-              <div className="mb-4 flex items-center justify-between text-xs bg-[#F4EFEA] p-2 rounded-xl border border-[#E6DDD0]">
-                <span className="text-[#6E645D]">線上連線狀態：</span>
-                <button
-                  type="button"
-                  onClick={() => setIsSelfOnline(!isSelfOnline)}
-                  className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
-                    isSelfOnline ? 'bg-[#E8F0E8] text-[#3A523A] border border-[#CDE0CD]' : 'bg-[#F2EBE4] text-[#7A6455]'
-                  }`}
-                >
-                  {isSelfOnline ? '線上' : '已下線'}
-                </button>
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <button 
-                onClick={() => {
-                  if (!coEditorName.trim()) {
-                    showToast("提醒：尚未填寫配搭名稱，更新將顯示為『尚未設定』");
-                  } else {
-                    setIsSelfOnline(true);
-                    addLog(`${coEditorName.trim()} 已上線加入配搭`);
-                    showToast("已儲存配搭名稱");
-                  }
-                  setIsEditorModalOpen(false);
-                }}
-                className="w-full bg-[#8C6D58] hover:bg-[#785C49] text-white text-xs py-2 rounded-xl transition-colors font-medium"
-              >
-                確定
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isOnlineModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
-            <div className="flex items-center justify-between mb-3 border-b border-[#EBE4D8] pb-2">
-              <div className="flex items-center space-x-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${onlineUsers.length > 0 ? 'bg-[#4E6B4E] animate-pulse' : 'bg-[#A0958B]'}`}></span>
-                <h3 className="font-serif font-medium text-base text-[#2C2725]">目前線上配搭</h3>
-              </div>
-              <button onClick={() => setIsOnlineModalOpen(false)} className="text-[#A0958B] hover:text-[#3D3735]">
-                <X className="w-4 h-4" />
-              </button>
+      {/* LONG PRESS MENU: ROSTER ITEM */}
+      {activeRosterActionItem && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up">
+            <div className="text-center border-b border-[#EBE4D8] pb-2 mb-2">
+              <h4 className="font-serif font-medium text-base text-[#2C2725]">{activeRosterActionItem.name}</h4>
+              <p className="text-xs text-[#8C827A]">
+                {activeRosterActionItem.district || '跨區'} • {activeRosterActionItem.identity} {activeRosterActionItem.notes ? `(${activeRosterActionItem.notes})` : ''}
+              </p>
             </div>
 
-            <p className="text-xs text-[#8C827A] mb-3">
-              {onlineUsers.length > 0 ? (
-                <>當前有 <span className="font-semibold text-[#4E6B4E]">{onlineUsers.length} 位</span> 配搭同時在線上：</>
-              ) : (
-                <>目前尚無配搭在線上，請點選右上角圖示設定名稱並連線。</>
-              )}
-            </p>
-
-            {onlineUsers.length > 0 ? (
-              <div className="space-y-2.5 mb-4">
-                {onlineUsers.map(u => (
-                  <div key={u.id} className="flex items-center justify-between bg-[#F4EFEA] p-2.5 rounded-xl border border-[#E6DDD0]">
-                    <div className="flex items-center space-x-2.5">
-                      <div className={`w-7 h-7 rounded-full ${u.avatarBg} text-white flex items-center justify-center text-xs font-serif shadow-xs`}>
-                        {u.name.slice(0, 1)}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-xs font-medium text-[#2C2725]">{u.name}</span>
-                          {u.isSelf && <span className="text-[10px] bg-[#8C6D58] text-white px-1.5 py-0.2 rounded font-sans">(你)</span>}
-                        </div>
-                        <span className="text-[10px] text-[#8C827A] block">{u.status}</span>
-                      </div>
-                    </div>
-                    {u.isSelf ? (
-                      <button 
-                        onClick={() => {
-                          setIsSelfOnline(false);
-                          addLog(`${u.name} 已下線`);
-                          showToast("已下線");
-                        }}
-                        className="text-[10px] text-[#A84A4A] hover:underline"
-                      >
-                        下線
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-[#A0958B]">{u.lastActive}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            <button 
-              onClick={() => setIsOnlineModalOpen(false)}
-              className="w-full bg-[#8C6D58] text-white text-xs py-2 rounded-xl hover:bg-[#785C49] transition-colors"
+            <button
+              onClick={() => {
+                const text = `${activeRosterActionItem.name} (${activeRosterActionItem.district || '跨區'} ${activeRosterActionItem.identity}) ${activeRosterActionItem.notes}`;
+                handleCopyText(text, activeRosterActionItem.name);
+                setActiveRosterActionItem(null);
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-[#F4EFEA] hover:bg-[#EBE4D8] text-[#3D3735] py-2.5 rounded-xl text-xs font-medium transition-colors"
             >
-              關閉
+              <Copy className="w-4 h-4 text-[#8C6D58]" />
+              <span>複製姓名與備註</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setEditingRosterMember({ ...activeRosterActionItem });
+                setActiveRosterActionItem(null);
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-[#F4EFEA] hover:bg-[#EBE4D8] text-[#3D3735] py-2.5 rounded-xl text-xs font-medium transition-colors"
+            >
+              <Edit3 className="w-4 h-4 text-[#8C6D58]" />
+              <span>編輯資料</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setDeleteConfirmMember(activeRosterActionItem);
+                setActiveRosterActionItem(null);
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-[#FDF2F2] hover:bg-[#FADEDE] text-[#A84A4A] py-2.5 rounded-xl text-xs font-medium transition-colors"
+            >
+              <Trash2 className="w-4 h-4 text-[#A84A4A]" />
+              <span>刪除名單</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRosterActionItem(null)}
+              className="w-full text-center text-xs text-[#8C827A] pt-2"
+            >
+              取消
             </button>
           </div>
         </div>
       )}
 
+      {/* LONG PRESS MENU: PRAYER ITEM */}
+      {activePrayerActionItem && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up">
+            <div className="text-center border-b border-[#EBE4D8] pb-2 mb-2">
+              <span className="text-[10px] text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
+                {activePrayerActionItem.category}
+              </span>
+              <h4 className="font-serif font-medium text-base text-[#2C2725] mt-1">{activePrayerActionItem.title}</h4>
+            </div>
+
+            <button
+              onClick={() => {
+                handleCopyText(`${activePrayerActionItem.title}\n\n${activePrayerActionItem.content}`, activePrayerActionItem.title);
+                setActivePrayerActionItem(null);
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-[#F4EFEA] hover:bg-[#EBE4D8] text-[#3D3735] py-2.5 rounded-xl text-xs font-medium transition-colors"
+            >
+              <Copy className="w-4 h-4 text-[#8C6D58]" />
+              <span>複製事項內容</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentPrayerItem(activePrayerActionItem);
+                setIsPrayerModalOpen(true);
+                setActivePrayerActionItem(null);
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-[#F4EFEA] hover:bg-[#EBE4D8] text-[#3D3735] py-2.5 rounded-xl text-xs font-medium transition-colors"
+            >
+              <Edit3 className="w-4 h-4 text-[#8C6D58]" />
+              <span>編輯事項</span>
+            </button>
+
+            <button
+              onClick={() => setActivePrayerActionItem(null)}
+              className="w-full text-center text-xs text-[#8C827A] pt-2"
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT ROSTER MODAL */}
+      {editingRosterMember && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up">
+            <div className="flex items-center justify-between mb-4 border-b border-[#EBE4D8] pb-2">
+              <h3 className="font-serif font-medium text-base text-[#2C2725]">編輯代禱名單</h3>
+              <button onClick={() => setEditingRosterMember(null)} className="text-[#A0958B] hover:text-[#3D3735]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditMemberSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[#6E645D] mb-1">大分類 (區別)</label>
+                <select 
+                  value={editingRosterMember.district}
+                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, district: e.target.value })}
+                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                >
+                  <option value="">(無/跨區)</option>
+                  <option value="信光區">信光區</option>
+                  <option value="藝文區">藝文區</option>
+                  <option value="寶慶區">寶慶區</option>
+                  <option value="自強區">自強區</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[#6E645D] mb-1">年齡層</label>
+                  <select 
+                    value={editingRosterMember.ageGroup}
+                    onChange={(e) => setEditingRosterMember({ ...editingRosterMember, ageGroup: e.target.value })}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                  >
+                    <option value="">(無)</option>
+                    <option value="青職">青職</option>
+                    <option value="大專">大專</option>
+                    <option value="高中">高中</option>
+                    <option value="國中">國中</option>
+                    <option value="兒童">兒童</option>
+                    <option value="學齡前">學齡前</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[#6E645D] mb-1">性別</label>
+                  <select 
+                    value={editingRosterMember.gender}
+                    onChange={(e) => setEditingRosterMember({ ...editingRosterMember, gender: e.target.value })}
+                    className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                  >
+                    <option value="弟兄">弟兄</option>
+                    <option value="姊妹">姊妹</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#6E645D] mb-1">身份</label>
+                <select 
+                  value={editingRosterMember.identity}
+                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, identity: e.target.value })}
+                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                >
+                  <option value="聖徒">聖徒 (聖徒未得救家人)</option>
+                  <option value="福音朋友">福音朋友</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#6E645D] mb-1">姓名 *</label>
+                <input 
+                  type="text"
+                  required
+                  value={editingRosterMember.name}
+                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, name: e.target.value })}
+                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#6E645D] mb-1">備註</label>
+                <textarea 
+                  rows={2}
+                  value={editingRosterMember.notes}
+                  onChange={(e) => setEditingRosterMember({ ...editingRosterMember, notes: e.target.value })}
+                  className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end space-x-2">
+                <button 
+                  type="button" 
+                  onClick={() => setEditingRosterMember(null)}
+                  className="px-4 py-2 text-xs rounded-xl text-[#8C827A] hover:bg-[#F4EFEA]"
+                >
+                  取消
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 text-xs rounded-xl bg-[#8C6D58] text-white hover:bg-[#785C49]"
+                >
+                  儲存變更
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteConfirmMember && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl text-center space-y-3">
+            <h3 className="font-serif font-medium text-base text-[#2C2725]">確認刪除？</h3>
+            <p className="text-xs text-[#6E645D]">
+              確定要將代禱對象 <span className="font-semibold text-[#A84A4A]">{deleteConfirmMember.name}</span> 從名單中移除嗎？
+            </p>
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setDeleteConfirmMember(null)}
+                className="flex-1 py-2 text-xs rounded-xl bg-[#F4EFEA] text-[#8C827A] hover:bg-[#EBE4D8]"
+              >
+                取消
+              </button>
+              <button
+                onClick={() => handleDeleteMember(deleteConfirmMember)}
+                className="flex-1 py-2 text-xs rounded-xl bg-[#A84A4A] text-white hover:bg-[#8E3B3B]"
+              >
+                刪除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDITOR NAME MODAL */}
+      {isEditorModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-serif font-medium text-base text-[#2C2725]">設定配搭名稱</h3>
+              <button onClick={() => setIsEditorModalOpen(false)} className="text-[#A0958B] hover:text-[#3D3735]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-[#8C827A] mb-4">請輸入您的稱呼，以便配搭們識別紀錄。</p>
+            <input 
+              type="text"
+              value={coEditorName}
+              onChange={(e) => setCoEditorName(e.target.value)}
+              placeholder="例如: 張弟兄 / 莊姊妹"
+              className="w-full bg-[#F4EFEA] border border-[#E6DDD0] rounded-xl px-3 py-2 text-xs focus:outline-none mb-3"
+            />
+            <button 
+              onClick={() => {
+                if (coEditorName.trim()) showToast("已儲存配搭名稱");
+                setIsEditorModalOpen(false);
+              }}
+              className="w-full bg-[#8C6D58] hover:bg-[#785C49] text-white text-xs py-2 rounded-xl font-medium"
+            >
+              確定
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ADD MEMBER MODAL */}
       {isAddMemberOpen && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto">
@@ -1084,7 +1219,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-[#6E645D] mb-1">備註 (如：大三/香蘭姐妹孫侄子)</label>
+                <label className="block text-[#6E645D] mb-1">備註</label>
                 <textarea 
                   rows={2}
                   placeholder="補充說明..."
@@ -1114,6 +1249,7 @@ export default function App() {
         </div>
       )}
 
+      {/* PRAYER ITEM MODAL */}
       {isPrayerModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-md shadow-xl animate-scale-up max-h-[90vh] flex flex-col">
@@ -1154,7 +1290,7 @@ export default function App() {
               </div>
 
               <div className="flex-1 flex flex-col min-h-[160px]">
-                <label className="block text-[#6E645D] mb-1">整篇內文 (可直接複製粘貼或編輯) *</label>
+                <label className="block text-[#6E645D] mb-1">整篇內文 *</label>
                 <textarea 
                   required
                   rows={8}
@@ -1185,6 +1321,7 @@ export default function App() {
         </div>
       )}
 
+      {/* TOAST NOTIFICATION */}
       {toastMessage && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#3D3735] text-[#FDFBF7] px-4 py-2 rounded-full text-xs shadow-md flex items-center space-x-1.5 animate-bounce-short">
           <Check className="w-3.5 h-3.5 text-[#768A75]" />
