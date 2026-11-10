@@ -240,7 +240,6 @@ export default function App() {
     if (!saved) return INITIAL_ROSTER;
     try {
       const parsed = JSON.parse(saved);
-      // 【保險機制】：強制修正 localStorage 中所有被誤植為聖徒稱謂的福音朋友/未得救家人
       return parsed.map(item => {
         if (item.identity === '福音朋友' || item.identity === '聖徒未得救的家人') {
           if (item.gender === '弟兄') return { ...item, gender: '男介' };
@@ -670,7 +669,6 @@ export default function App() {
             {viewMode === 'card' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {filteredRoster.map(item => {
-                  // 【保險機制】：若身份是福音朋友/未得救家人，但稱謂被誤植為弟兄/姊妹，直接強制顯示為男介/女介
                   let displayGender = item.gender;
                   if ((item.identity === '福音朋友' || item.identity === '聖徒未得救的家人')) {
                     if (displayGender === '弟兄') displayGender = '男介';
@@ -718,7 +716,7 @@ export default function App() {
               </div>
             )}
 
-            {/* SUMMARY VIEW */}
+            {/* SUMMARY VIEW (動態隱藏無資料的空方塊) */}
             {viewMode === 'summary' && (
               <div className="space-y-4">
                 {selectedDistrict === '全部' && selectedAge !== '全部' ? (
@@ -729,31 +727,54 @@ export default function App() {
                         共 {filteredRoster.length} 人
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
-                        <div className="font-medium text-[#7A6455] mb-1">聖徒 ({filteredRoster.filter(i => i.identity === '聖徒').length})</div>
-                        <div className="text-[#5A524D] leading-relaxed">
-                          {filteredRoster.filter(i => i.identity === '聖徒').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
+                    <div className={`grid gap-2 text-xs ${
+                      [
+                        filteredRoster.filter(i => i.identity === '聖徒').length > 0 ? 1 : 0,
+                        filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 ? 1 : 0,
+                        filteredRoster.filter(i => i.identity === '福音朋友').length > 0 ? 1 : 0
+                      ].reduce((a, b) => a + b, 0) === 2 ? 'grid-cols-2' :
+                      [
+                        filteredRoster.filter(i => i.identity === '聖徒').length > 0 ? 1 : 0,
+                        filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 ? 1 : 0,
+                        filteredRoster.filter(i => i.identity === '福音朋友').length > 0 ? 1 : 0
+                      ].reduce((a, b) => a + b, 0) === 1 ? 'grid-cols-1' : 'grid-cols-3'
+                    }`}>
+                      {filteredRoster.filter(i => i.identity === '聖徒').length > 0 && (
+                        <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
+                          <div className="font-medium text-[#7A6455] mb-1">聖徒 ({filteredRoster.filter(i => i.identity === '聖徒').length})</div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '聖徒').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
                         </div>
-                      </div>
-                      <div className="bg-[#FFF8F0] p-2 rounded-lg">
-                        <div className="font-medium text-[#D97706] mb-1">未得救家人 ({filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length})</div>
-                        <div className="text-[#5A524D] leading-relaxed">
-                          {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
+                      )}
+                      {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 && (
+                        <div className="bg-[#FFF8F0] p-2 rounded-lg">
+                          <div className="font-medium text-[#D97706] mb-1">未得救家人 ({filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length})</div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
                         </div>
-                      </div>
-                      <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
-                        <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({filteredRoster.filter(i => i.identity === '福音朋友').length})</div>
-                        <div className="text-[#5A524D] leading-relaxed">
-                          {filteredRoster.filter(i => i.identity === '福音朋友').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、') || '無'}
+                      )}
+                      {filteredRoster.filter(i => i.identity === '福音朋友').length > 0 && (
+                        <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
+                          <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({filteredRoster.filter(i => i.identity === '福音朋友').length})</div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '福音朋友').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 ) : (
                   ['信光區', '藝文區', '寶慶區', '自強區'].map(dist => {
                     const distItems = filteredRoster.filter(r => r.district === dist);
                     if (distItems.length === 0) return null;
+
+                    const saints = distItems.filter(i => i.identity === '聖徒');
+                    const family = distItems.filter(i => i.identity === '聖徒未得救的家人');
+                    const friends = distItems.filter(i => i.identity === '福音朋友');
+                    
+                    const activeCount = (saints.length > 0 ? 1 : 0) + (family.length > 0 ? 1 : 0) + (friends.length > 0 ? 1 : 0);
 
                     return (
                       <div key={dist} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
@@ -763,25 +784,31 @@ export default function App() {
                             共 {distItems.length} 人
                           </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 text-xs">
-                          <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
-                            <div className="font-medium text-[#7A6455] mb-1">聖徒 ({distItems.filter(i => i.identity === '聖徒').length})</div>
-                            <div className="text-[#5A524D] leading-relaxed">
-                              {distItems.filter(i => i.identity === '聖徒').map(i => i.name).join('、') || '無'}
+                        <div className={`grid gap-2 text-xs ${activeCount === 2 ? 'grid-cols-2' : activeCount === 1 ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                          {saints.length > 0 && (
+                            <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
+                              <div className="font-medium text-[#7A6455] mb-1">聖徒 ({saints.length})</div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {saints.map(i => i.name).join('、')}
+                              </div>
                             </div>
-                          </div>
-                          <div className="bg-[#FFF8F0] p-2 rounded-lg">
-                            <div className="font-medium text-[#D97706] mb-1">未得救家人 ({distItems.filter(i => i.identity === '聖徒未得救的家人').length})</div>
-                            <div className="text-[#5A524D] leading-relaxed">
-                              {distItems.filter(i => i.identity === '聖徒未得救的家人').map(i => i.name).join('、') || '無'}
+                          )}
+                          {family.length > 0 && (
+                            <div className="bg-[#FFF8F0] p-2 rounded-lg">
+                              <div className="font-medium text-[#D97706] mb-1">未得救家人 ({family.length})</div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {family.map(i => i.name).join('、')}
+                              </div>
                             </div>
-                          </div>
-                          <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
-                            <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({distItems.filter(i => i.identity === '福音朋友').length})</div>
-                            <div className="text-[#5A524D] leading-relaxed">
-                              {distItems.filter(i => i.identity === '福音朋友').map(i => i.name).join('、') || '無'}
+                          )}
+                          {friends.length > 0 && (
+                            <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
+                              <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({friends.length})</div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {friends.map(i => i.name).join('、')}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -939,10 +966,16 @@ export default function App() {
         </button>
       )}
 
-      {/* LONG PRESS MENU: ROSTER ITEM */}
+      {/* LONG PRESS MENU: ROSTER ITEM (點擊陰影關閉) */}
       {activeRosterActionItem && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up">
+        <div 
+          onClick={() => setActiveRosterActionItem(null)}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up"
+          >
             <div className="text-center border-b border-[#EBE4D8] pb-2 mb-2">
               <h4 className="font-serif font-medium text-base text-[#2C2725]">{activeRosterActionItem.name}</h4>
               <p className="text-xs text-[#8C827A]">
@@ -994,10 +1027,16 @@ export default function App() {
         </div>
       )}
 
-      {/* LONG PRESS MENU: PRAYER ITEM */}
+      {/* LONG PRESS MENU: PRAYER ITEM (點擊陰影關閉) */}
       {activePrayerActionItem && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up">
+        <div 
+          onClick={() => setActivePrayerActionItem(null)}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-4 w-full max-w-xs shadow-2xl space-y-2 animate-scale-up"
+          >
             <div className="text-center border-b border-[#EBE4D8] pb-2 mb-2">
               <span className="text-[10px] text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
                 {activePrayerActionItem.category}
@@ -1038,10 +1077,16 @@ export default function App() {
         </div>
       )}
 
-      {/* ONLINE USERS MODAL */}
+      {/* ONLINE USERS MODAL (點擊陰影關閉) */}
       {isOnlineModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
+        <div 
+          onClick={() => setIsOnlineModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up"
+          >
             <div className="flex items-center justify-between mb-3 border-b border-[#EBE4D8] pb-2">
               <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#4E6B4E] animate-pulse"></span>
@@ -1099,10 +1144,16 @@ export default function App() {
         </div>
       )}
 
-      {/* EDIT ROSTER MODAL */}
+      {/* EDIT ROSTER MODAL (點擊陰影關閉) */}
       {editingRosterMember && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up">
+        <div 
+          onClick={() => setEditingRosterMember(null)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up"
+          >
             <div className="flex items-center justify-between mb-4 border-b border-[#EBE4D8] pb-2">
               <h3 className="font-serif font-medium text-base text-[#2C2725]">編輯代禱名單</h3>
               <button onClick={() => setEditingRosterMember(null)} className="text-[#A0958B] hover:text-[#3D3735]">
@@ -1231,10 +1282,16 @@ export default function App() {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE CONFIRMATION MODAL (點擊陰影關閉) */}
       {deleteConfirmMember && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl text-center space-y-3">
+        <div 
+          onClick={() => setDeleteConfirmMember(null)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl text-center space-y-3"
+          >
             <h3 className="font-serif font-medium text-base text-[#2C2725]">確認刪除？</h3>
             <p className="text-xs text-[#6E645D]">
               確定要將代禱對象 <span className="font-semibold text-[#A84A4A]">{deleteConfirmMember.name}</span> 從名單中移除嗎？
@@ -1257,10 +1314,16 @@ export default function App() {
         </div>
       )}
 
-      {/* EDITOR NAME MODAL */}
+      {/* EDITOR NAME MODAL (點擊陰影關閉) */}
       {isEditorModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up">
+        <div 
+          onClick={() => setIsEditorModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-xs shadow-xl animate-scale-up"
+          >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-serif font-medium text-base text-[#2C2725]">設定配搭名稱</h3>
               <button onClick={() => setIsEditorModalOpen(false)} className="text-[#A0958B] hover:text-[#3D3735]">
@@ -1291,10 +1354,16 @@ export default function App() {
         </div>
       )}
 
-      {/* ADD MEMBER MODAL */}
+      {/* ADD MEMBER MODAL (點擊陰影關閉) */}
       {isAddMemberOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setIsAddMemberOpen(false)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-sm shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto"
+          >
             <div className="flex items-center justify-between mb-4 border-b border-[#EBE4D8] pb-2">
               <h3 className="font-serif font-medium text-base text-[#2C2725]">新增代禱名單</h3>
               <button onClick={() => setIsAddMemberOpen(false)} className="text-[#A0958B] hover:text-[#3D3735]">
@@ -1424,10 +1493,16 @@ export default function App() {
         </div>
       )}
 
-      {/* PRAYER ITEM MODAL */}
+      {/* PRAYER ITEM MODAL (點擊陰影關閉) */}
       {isPrayerModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-md shadow-xl animate-scale-up max-h-[90vh] flex flex-col">
+        <div 
+          onClick={() => setIsPrayerModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FDFBF7] rounded-2xl border border-[#EBE4D8] p-5 w-full max-w-md shadow-xl animate-scale-up max-h-[90vh] flex flex-col"
+          >
             <div className="flex items-center justify-between mb-4 border-b border-[#EBE4D8] pb-2">
               <h3 className="font-serif font-medium text-base text-[#2C2725]">
                 {currentPrayerItem.id ? "編輯代禱事項" : "新增代禱事項"}
