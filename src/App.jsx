@@ -716,50 +716,93 @@ export default function App() {
               </div>
             )}
 
-            {/* SUMMARY VIEW (動態隱藏無資料的空方塊) */}
+            {/* SUMMARY VIEW (條列式：聖徒分弟兄/姊妹，福音朋友/未得救家人分男介/女介，自動隱藏無資料群組) */}
             {viewMode === 'summary' && (
               <div className="space-y-4">
                 {selectedDistrict === '全部' && selectedAge !== '全部' ? (
-                  <div className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
-                    <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2 mb-2">
+                  <div className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2">
                       <span className="font-serif font-medium text-sm text-[#2C2725]">年齡層總表：{selectedAge}</span>
                       <span className="text-xs text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
                         共 {filteredRoster.length} 人
                       </span>
                     </div>
-                    <div className={`grid gap-2 text-xs ${
-                      [
-                        filteredRoster.filter(i => i.identity === '聖徒').length > 0 ? 1 : 0,
-                        filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 ? 1 : 0,
-                        filteredRoster.filter(i => i.identity === '福音朋友').length > 0 ? 1 : 0
-                      ].reduce((a, b) => a + b, 0) === 2 ? 'grid-cols-2' :
-                      [
-                        filteredRoster.filter(i => i.identity === '聖徒').length > 0 ? 1 : 0,
-                        filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 ? 1 : 0,
-                        filteredRoster.filter(i => i.identity === '福音朋友').length > 0 ? 1 : 0
-                      ].reduce((a, b) => a + b, 0) === 1 ? 'grid-cols-1' : 'grid-cols-3'
-                    }`}>
-                      {filteredRoster.filter(i => i.identity === '聖徒').length > 0 && (
-                        <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
-                          <div className="font-medium text-[#7A6455] mb-1">聖徒 ({filteredRoster.filter(i => i.identity === '聖徒').length})</div>
+
+                    <div className="space-y-2.5 text-xs">
+                      {/* 聖徒：弟兄 */}
+                      {filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '弟兄').length > 0 && (
+                        <div className="bg-[#F4EFEA]/60 p-2.5 rounded-xl border border-[#E6DDD0]/60">
+                          <div className="font-medium text-[#7A6455] mb-1 flex justify-between">
+                            <span>聖徒 - 弟兄</span>
+                            <span className="text-[11px] text-[#8C6D58]">({filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '弟兄').length}人)</span>
+                          </div>
                           <div className="text-[#5A524D] leading-relaxed">
-                            {filteredRoster.filter(i => i.identity === '聖徒').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                            {filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '弟兄').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
                           </div>
                         </div>
                       )}
-                      {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length > 0 && (
-                        <div className="bg-[#FFF8F0] p-2 rounded-lg">
-                          <div className="font-medium text-[#D97706] mb-1">未得救家人 ({filteredRoster.filter(i => i.identity === '聖徒未得救的家人').length})</div>
+
+                      {/* 聖徒：姊妹 */}
+                      {filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '姊妹').length > 0 && (
+                        <div className="bg-[#F4EFEA]/60 p-2.5 rounded-xl border border-[#E6DDD0]/60">
+                          <div className="font-medium text-[#7A6455] mb-1 flex justify-between">
+                            <span>聖徒 - 姊妹</span>
+                            <span className="text-[11px] text-[#8C6D58]">({filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '姊妹').length}人)</span>
+                          </div>
                           <div className="text-[#5A524D] leading-relaxed">
-                            {filteredRoster.filter(i => i.identity === '聖徒未得救的家人').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                            {filteredRoster.filter(i => i.identity === '聖徒' && i.gender === '姊妹').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
                           </div>
                         </div>
                       )}
-                      {filteredRoster.filter(i => i.identity === '福音朋友').length > 0 && (
-                        <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
-                          <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({filteredRoster.filter(i => i.identity === '福音朋友').length})</div>
+
+                      {/* 未得救家人：男介 */}
+                      {filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '男介').length > 0 && (
+                        <div className="bg-[#FFF8F0] p-2.5 rounded-xl border border-[#FDE6C8]/60">
+                          <div className="font-medium text-[#D97706] mb-1 flex justify-between">
+                            <span>未得救家人 - 男介</span>
+                            <span className="text-[11px] text-[#D97706]">({filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '男介').length}人)</span>
+                          </div>
                           <div className="text-[#5A524D] leading-relaxed">
-                            {filteredRoster.filter(i => i.identity === '福音朋友').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                            {filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '男介').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 未得救家人：女介 */}
+                      {filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '女介').length > 0 && (
+                        <div className="bg-[#FFF8F0] p-2.5 rounded-xl border border-[#FDE6C8]/60">
+                          <div className="font-medium text-[#D97706] mb-1 flex justify-between">
+                            <span>未得救家人 - 女介</span>
+                            <span className="text-[11px] text-[#D97706]">({filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '女介').length}人)</span>
+                          </div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '女介').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 福音朋友：男介 */}
+                      {filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '男介').length > 0 && (
+                        <div className="bg-[#E8F0E8]/50 p-2.5 rounded-xl border border-[#D0E4D0]/60">
+                          <div className="font-medium text-[#4E6B4E] mb-1 flex justify-between">
+                            <span>福音朋友 - 男介</span>
+                            <span className="text-[11px] text-[#4E6B4E]">({filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '男介').length}人)</span>
+                          </div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '男介').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 福音朋友：女介 */}
+                      {filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '女介').length > 0 && (
+                        <div className="bg-[#E8F0E8]/50 p-2.5 rounded-xl border border-[#D0E4D0]/60">
+                          <div className="font-medium text-[#4E6B4E] mb-1 flex justify-between">
+                            <span>福音朋友 - 女介</span>
+                            <span className="text-[11px] text-[#4E6B4E]">({filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '女介').length}人)</span>
+                          </div>
+                          <div className="text-[#5A524D] leading-relaxed">
+                            {filteredRoster.filter(i => i.identity === '福音朋友' && i.gender === '女介').map(i => `${i.name}${i.district ? `(${i.district})` : ''}`).join('、')}
                           </div>
                         </div>
                       )}
@@ -770,42 +813,91 @@ export default function App() {
                     const distItems = filteredRoster.filter(r => r.district === dist);
                     if (distItems.length === 0) return null;
 
-                    const saints = distItems.filter(i => i.identity === '聖徒');
-                    const family = distItems.filter(i => i.identity === '聖徒未得救的家人');
-                    const friends = distItems.filter(i => i.identity === '福音朋友');
-                    
-                    const activeCount = (saints.length > 0 ? 1 : 0) + (family.length > 0 ? 1 : 0) + (friends.length > 0 ? 1 : 0);
+                    const saintsB = distItems.filter(i => i.identity === '聖徒' && i.gender === '弟兄');
+                    const saintsS = distItems.filter(i => i.identity === '聖徒' && i.gender === '姊妹');
+                    const familyM = distItems.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '男介');
+                    const familyF = distItems.filter(i => i.identity === '聖徒未得救的家人' && i.gender === '女介');
+                    const friendsM = distItems.filter(i => i.identity === '福音朋友' && i.gender === '男介');
+                    const friendsF = distItems.filter(i => i.identity === '福音朋友' && i.gender === '女介');
 
                     return (
-                      <div key={dist} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs">
-                        <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2 mb-2">
+                      <div key={dist} className="bg-[#FDFBF7] border border-[#EBE4D8] rounded-xl p-3.5 shadow-xs space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#EBE4D8] pb-2">
                           <span className="font-serif font-medium text-sm text-[#2C2725]">{dist}</span>
                           <span className="text-xs text-[#8C6D58] bg-[#F2EBE4] px-2 py-0.5 rounded-full font-medium">
                             共 {distItems.length} 人
                           </span>
                         </div>
-                        <div className={`grid gap-2 text-xs ${activeCount === 2 ? 'grid-cols-2' : activeCount === 1 ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                          {saints.length > 0 && (
-                            <div className="bg-[#F4EFEA]/60 p-2 rounded-lg">
-                              <div className="font-medium text-[#7A6455] mb-1">聖徒 ({saints.length})</div>
+
+                        <div className="space-y-2.5 text-xs">
+                          {saintsB.length > 0 && (
+                            <div className="bg-[#F4EFEA]/60 p-2.5 rounded-xl border border-[#E6DDD0]/60">
+                              <div className="font-medium text-[#7A6455] mb-1 flex justify-between">
+                                <span>聖徒 - 弟兄</span>
+                                <span className="text-[11px] text-[#8C6D58]">({saintsB.length}人)</span>
+                              </div>
                               <div className="text-[#5A524D] leading-relaxed">
-                                {saints.map(i => i.name).join('、')}
+                                {saintsB.map(i => i.name).join('、')}
                               </div>
                             </div>
                           )}
-                          {family.length > 0 && (
-                            <div className="bg-[#FFF8F0] p-2 rounded-lg">
-                              <div className="font-medium text-[#D97706] mb-1">未得救家人 ({family.length})</div>
+
+                          {saintsS.length > 0 && (
+                            <div className="bg-[#F4EFEA]/60 p-2.5 rounded-xl border border-[#E6DDD0]/60">
+                              <div className="font-medium text-[#7A6455] mb-1 flex justify-between">
+                                <span>聖徒 - 姊妹</span>
+                                <span className="text-[11px] text-[#8C6D58]">({saintsS.length}人)</span>
+                              </div>
                               <div className="text-[#5A524D] leading-relaxed">
-                                {family.map(i => i.name).join('、')}
+                                {saintsS.map(i => i.name).join('、')}
                               </div>
                             </div>
                           )}
-                          {friends.length > 0 && (
-                            <div className="bg-[#E8F0E8]/50 p-2 rounded-lg">
-                              <div className="font-medium text-[#4E6B4E] mb-1">福音朋友 ({friends.length})</div>
+
+                          {familyM.length > 0 && (
+                            <div className="bg-[#FFF8F0] p-2.5 rounded-xl border border-[#FDE6C8]/60">
+                              <div className="font-medium text-[#D97706] mb-1 flex justify-between">
+                                <span>未得救家人 - 男介</span>
+                                <span className="text-[11px] text-[#D97706]">({familyM.length}人)</span>
+                              </div>
                               <div className="text-[#5A524D] leading-relaxed">
-                                {friends.map(i => i.name).join('、')}
+                                {familyM.map(i => i.name).join('、')}
+                              </div>
+                            </div>
+                          )}
+
+                          {familyF.length > 0 && (
+                            <div className="bg-[#FFF8F0] p-2.5 rounded-xl border border-[#FDE6C8]/60">
+                              <div className="font-medium text-[#D97706] mb-1 flex justify-between">
+                                <span>未得救家人 - 女介</span>
+                                <span className="text-[11px] text-[#D97706]">({familyF.length}人)</span>
+                              </div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {familyF.map(i => i.name).join('、')}
+                              </div>
+                            </div>
+                          )}
+
+                          {friendsM.length > 0 && (
+                            <div className="bg-[#E8F0E8]/50 p-2.5 rounded-xl border border-[#D0E4D0]/60">
+                              <div className="font-medium text-[#4E6B4E] mb-1 flex justify-between">
+                                <span>福音朋友 - 男介</span>
+                                <span className="text-[11px] text-[#4E6B4E]">({friendsM.length}人)</span>
+                              </div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {friendsM.map(i => i.name).join('、')}
+                              </div>
+                            </div>
+                          )}
+
+                          {friendsF.length > 0 && (
+                            <div className="bg-[#E8F0E8]/50 p-2.5 rounded-xl border border-[#D0E4D0]/60">
+                              <div className="font-medium text-[#4E6B4E] mb-1 flex justify-between">
+                                <span>福音朋友 - 女介</span>
+                                <span className="text-[11px] text-[#4E6B4E]">({friendsF.length}人)</span>
+                              </div>
+                              <div className="text-[#5A524D] leading-relaxed">
+                                {friendsF.map(i => i.name).join('、')}
                               </div>
                             </div>
                           )}
@@ -966,7 +1058,7 @@ export default function App() {
         </button>
       )}
 
-      {/* LONG PRESS MENU: ROSTER ITEM (點擊陰影關閉) */}
+      {/* LONG PRESS MENU: ROSTER ITEM */}
       {activeRosterActionItem && (
         <div 
           onClick={() => setActiveRosterActionItem(null)}
@@ -1027,7 +1119,7 @@ export default function App() {
         </div>
       )}
 
-      {/* LONG PRESS MENU: PRAYER ITEM (點擊陰影關閉) */}
+      {/* LONG PRESS MENU: PRAYER ITEM */}
       {activePrayerActionItem && (
         <div 
           onClick={() => setActivePrayerActionItem(null)}
@@ -1077,7 +1169,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ONLINE USERS MODAL (點擊陰影關閉) */}
+      {/* ONLINE USERS MODAL */}
       {isOnlineModalOpen && (
         <div 
           onClick={() => setIsOnlineModalOpen(false)}
@@ -1144,7 +1236,7 @@ export default function App() {
         </div>
       )}
 
-      {/* EDIT ROSTER MODAL (點擊陰影關閉) */}
+      {/* EDIT ROSTER MODAL */}
       {editingRosterMember && (
         <div 
           onClick={() => setEditingRosterMember(null)}
@@ -1282,7 +1374,7 @@ export default function App() {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL (點擊陰影關閉) */}
+      {/* DELETE CONFIRMATION MODAL */}
       {deleteConfirmMember && (
         <div 
           onClick={() => setDeleteConfirmMember(null)}
@@ -1314,7 +1406,7 @@ export default function App() {
         </div>
       )}
 
-      {/* EDITOR NAME MODAL (點擊陰影關閉) */}
+      {/* EDITOR NAME MODAL */}
       {isEditorModalOpen && (
         <div 
           onClick={() => setIsEditorModalOpen(false)}
@@ -1354,7 +1446,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ADD MEMBER MODAL (點擊陰影關閉) */}
+      {/* ADD MEMBER MODAL */}
       {isAddMemberOpen && (
         <div 
           onClick={() => setIsAddMemberOpen(false)}
@@ -1493,7 +1585,7 @@ export default function App() {
         </div>
       )}
 
-      {/* PRAYER ITEM MODAL (點擊陰影關閉) */}
+      {/* PRAYER ITEM MODAL */}
       {isPrayerModalOpen && (
         <div 
           onClick={() => setIsPrayerModalOpen(false)}
