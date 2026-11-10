@@ -340,22 +340,32 @@ export default function App() {
     setLogs(prev => [newLog, ...prev]);
   };
 
-  // Roster filtering
+// Roster filtering
   const filteredRoster = useMemo(() => {
     return roster.filter(item => {
-      // District filter
-      if (selectedDistrict !== '全部' && item.district !== selectedDistrict) return false;
-      // Identity filter
+      // 區別篩選：如果選「全部」則通過；如果選特定區別，則檢查是否相符（或者該對象區別為空但符合該年齡層群組）
+      if (selectedDistrict !== '全部') {
+        if (item.district !== selectedDistrict) return false;
+      }
+      
+      // 身份篩選
       if (selectedIdentity !== '全部' && item.identity !== selectedIdentity) return false;
-      // Age group filter
-      if (selectedAge !== '全部' && item.ageGroup !== selectedAge) return false;
-      // Search query
+      
+      // 年齡層篩選：支援精準對應或包含關係
+      if (selectedAge !== '全部') {
+        if (!item.ageGroup || !item.ageGroup.includes(selectedAge)) {
+          return false;
+        }
+      }
+
+      // 搜尋關鍵字
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(query);
         const matchNotes = item.notes.toLowerCase().includes(query);
         const matchDistrict = item.district.toLowerCase().includes(query);
-        if (!matchName && !matchNotes && !matchDistrict) return false;
+        const matchAge = item.ageGroup.toLowerCase().includes(query);
+        if (!matchName && !matchNotes && !matchDistrict && !matchAge) return false;
       }
       return true;
     });
